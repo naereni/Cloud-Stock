@@ -72,7 +72,7 @@ elif [[ "$mode" == "dev" ]]; then
     wait
 
 elif [[ "$mode" == "deploy" ]]; then
-    source /home/dev/Cloud-stock/venv/bin/activate
+    source /home/dev/Cloud-Stock/venv/bin/activate
     pip install -r requirements.txt
     create_logs
     rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
@@ -83,10 +83,10 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py load_stocks
 
     sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
-    sudo systemctl link /home/dev/Cloud-stock/systemd_services/celery_worker.service /etc/systemd/system/
-    sudo systemctl link /home/dev/Cloud-stock/systemd_services/celery_beat.service /etc/systemd/system/
-    sudo systemctl link /home/dev/Cloud-stock/systemd_services/gunicorn.service /etc/systemd/system/
-    sudo ln -sf /home/dev/Cloud-stock/systemd_services/cs_nginx_conf /etc/nginx/sites-available/
+    sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_worker.service /etc/systemd/system/
+    sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_beat.service /etc/systemd/system/
+    sudo systemctl link /home/dev/Cloud-Stock/systemd_services/gunicorn.service /etc/systemd/system/
+    sudo ln -sf /home/dev/Cloud-Stock/systemd_services/cs_nginx_conf /etc/nginx/sites-available/
     sudo ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
     sudo systemctl daemon-reload
     sudo systemctl start redis gunicorn celery_worker.service celery_beat.service nginx
