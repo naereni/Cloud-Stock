@@ -5,7 +5,7 @@ server {
     location = /favicon.ico { access_log off; log_not_found off; }
 
     location /static/ {
-        root /root/Cloud-stock/Cloud_Stock/;
+        root /home/dev/Cloud-Stock/Cloud_Stock/;
         expires 30d;
         add_header Cache-Control "public, max-age=2592000";
     }

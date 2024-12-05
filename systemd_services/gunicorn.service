@@ -6,10 +6,10 @@ After=network.target
 [Service]
 User=dev
 Group=www-data
-WorkingDirectory=/home/dev/Cloud-stock
-ExecStart=/home/dev/Cloud-stock/venv/bin/gunicorn \
-        --access-logfile /home/dev/Cloud-stock/logs/gunicorn-access.log \
-        --error-logfile /home/dev/Cloud-stock/logs/gunicorn-error.log \
+WorkingDirectory=/home/dev/Cloud-Stock
+ExecStart=/home/dev/Cloud-Stock/venv/bin/gunicorn \
+        --access-logfile /home/dev/Cloud-Stock/logs/gunicorn-access.log \
+        --error-logfile /home/dev/Cloud-Stock/logs/gunicorn-error.log \
         --workers 3 --bind unix:/run/gunicorn.sock Cloud_Stock.wsgi:application
 
 [Install]
