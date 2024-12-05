@@ -83,9 +83,9 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py load_stocks
 
     sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
-    sudo ln -sf /home/dev/Cloud-stock/systemd_services/celery_worker.service /etc/systemd/system/
-    sudo ln -sf /home/dev/Cloud-stock/systemd_services/celery_beat.service /etc/systemd/system/
-    sudo ln -sf /home/dev/Cloud-stock/systemd_services/gunicorn.service /etc/systemd/system/
+    sudo systemctl link /home/dev/Cloud-stock/systemd_services/celery_worker.service /etc/systemd/system/
+    sudo systemctl link /home/dev/Cloud-stock/systemd_services/celery_beat.service /etc/systemd/system/
+    sudo systemctl link /home/dev/Cloud-stock/systemd_services/gunicorn.service /etc/systemd/system/
     sudo ln -sf /home/dev/Cloud-stock/nginx/cs_nginx_conf /etc/nginx/sites-available/
     sudo ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
     sudo systemctl daemon-reload
