@@ -72,7 +72,7 @@ elif [[ "$mode" == "dev" ]]; then
     wait
 
 elif [[ "$mode" == "deploy" ]]; then
-    source venv/bin/activate
+    source /home/dev/Cloud-stock/venv/bin/activate
     pip install -r requirements.txt
     create_logs
     rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
