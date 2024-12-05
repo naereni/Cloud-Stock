@@ -8,7 +8,6 @@ from Cloud_Stock.models import Product
 from api.utils.CacheManager import CacheManager
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
-from api.response_examples import *
 from logging.handlers import RotatingFileHandler
 import pathlib
 from datetime import datetime
