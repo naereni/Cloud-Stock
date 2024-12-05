@@ -81,22 +81,16 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py create_users
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
     python manage.py load_stocks
-    sudo systemctl stop celery_beat.service
-    sudo systemctl stop celery_worker.service
-    sudo systemctl stop gunicorn.service
-    sudo systemctl stop nginx
-    sudo systemctl stop redis
-    ln -sf /home/dev/Cloud-stock/systemd_services/celery_worker.service /etc/systemd/system/
-    ln -sf /home/dev/Cloud-stock/systemd_services/celery_beat.service /etc/systemd/system/
-    ln -sf /home/dev/Cloud-stock/systemd_services/gunicorn.service /etc/systemd/system/
-    ln -sf /home/dev/Cloud-stock/nginx/cs_nginx_conf /etc/nginx/sites-available/
-    ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
-    sudo systemctl daemon-reload
-    sudo systemctl start redis
-    sudo systemctl start gunicorn
-    sudo systemctl start celery_worker.service
-    sudo systemctl start celery_beat.service
-    sudo systemctl start nginx
+    sudo bash -c '
+        systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
+        ln -sf /home/dev/Cloud-stock/systemd_services/celery_worker.service /etc/systemd/system/
+        ln -sf /home/dev/Cloud-stock/systemd_services/celery_beat.service /etc/systemd/system/
+        ln -sf /home/dev/Cloud-stock/systemd_services/gunicorn.service /etc/systemd/system/
+        ln -sf /home/dev/Cloud-stock/nginx/cs_nginx_conf /etc/nginx/sites-available/
+        ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
+        systemctl daemon-reload
+        systemctl start redis gunicorn celery_worker.service celery_beat.service nginx
+    '
 else
     echo "Invalid argument: $mode. Use 'dev' or 'deploy'."
     exit 1
