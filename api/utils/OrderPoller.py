@@ -35,11 +35,14 @@ class OrderPoller:
 
     async def poll_ozon_orders(self):
         q = (
-            await Product.objects.filter(ozon_sku__isnull=False)
-            .exclude(ozon_sku="")
-            .values_list("ozon_sku", flat=True)
-            .distinct()
+            list(await sync_to_async(
+                lambda: list(Product.objects.filter(ozon_sku__isnull=False)
+                .exclude(ozon_sku="")
+                .values_list("ozon_sku", flat=True)
+                .distinct())
+            )())
         )
+        await sync_to_async(print)(q)
         ozon_stocks = await ozon.aget_stocks(q)
         logger.warning(f"Дата изменения запаса")
         for item in ozon_stocks:

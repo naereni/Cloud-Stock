@@ -84,4 +84,3 @@ class Ymarket:
 
 
 ymarket = Ymarket()
-print(ymarket.get_warehouses())

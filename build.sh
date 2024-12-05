@@ -6,21 +6,11 @@ if [ ! -d "$LOG_DIR" ]; then
     mkdir -p "$LOG_DIR"
 fi
 
-export DJANGO_LOG="$LOG_DIR/django.log"
 export CELERY_LOG="$LOG_DIR/celery.log"
 
 create_logs() {
     rm "$LOG_DIR/*"
-    touch "$DJANGO_LOG"
-    {
-        echo "$(date '+%d.%m.%Y %H:%M:%S')\n"
-    } > "$DJANGO_LOG"
-    echo "Created $DJANGO_LOG"
-
     touch "$CELERY_LOG"
-    {
-        echo "$(date '+%d.%m.%Y %H:%M:%S')\n"
-    } > "$CELERY_LOG"
     echo "Created $CELERY_LOG"
 }
 
@@ -32,6 +22,8 @@ cleanup() {
     echo "Django stopped"
     redis-cli shutdown
     rm $SCRIPT_DIR/dump.rdb
+    rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    rm celerybeat-schedule
 }
 
 os_name=$(uname)
@@ -60,7 +52,7 @@ if [[ "$mode" == "stop" ]]; then
     systemctl stop celery_worker.service
     systemctl stop celery_beat.service
     echo "Celery stopped"
-    systemctl stop cs_gunicorn.service
+    systemctl stop gunicorn.service
     echo "Gunicorn stopped"
     systemctl stop nginx
     echo "Nginx stopped"
@@ -88,14 +80,23 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py migrate
     python manage.py create_users
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
-    # python manage.py load_stocks
-    redis-server &
-    systemctl daemon-reload
-    systemctl restart cs_gunicorn
-    systemctl restart celery_worker.service
-    systemctl restart celery_beat.service
-    # ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled
-    systemctl restart nginx
+    python manage.py load_stocks
+    sudo systemctl stop celery_beat.service
+    sudo systemctl stop celery_worker.service
+    sudo systemctl stop gunicorn.service
+    sudo systemctl stop nginx
+    sudo systemctl stop redis
+    ln -sf /home/dev/Cloud-stock/systemd_services/celery_worker.service /etc/systemd/system/
+    ln -sf /home/dev/Cloud-stock/systemd_services/celery_beat.service /etc/systemd/system/
+    ln -sf /home/dev/Cloud-stock/systemd_services/gunicorn.service /etc/systemd/system/
+    ln -sf /home/dev/Cloud-stock/nginx/cs_nginx_conf /etc/nginx/sites-available/
+    ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
+    sudo systemctl daemon-reload
+    sudo systemctl start redis
+    sudo systemctl start gunicorn
+    sudo systemctl start celery_worker.service
+    sudo systemctl start celery_beat.service
+    sudo systemctl start nginx
 else
     echo "Invalid argument: $mode. Use 'dev' or 'deploy'."
     exit 1
