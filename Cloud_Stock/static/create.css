@@ -1,0 +1,125 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    margin: 50px auto;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+}
+
+/* Кнопка "Добавить товар" */
+button.btn-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+button.btn-success:hover {
+    background-color: #45a049;
+}
+
+/* Кнопка "Назад к товарам" */
+button.btn-primary {
+    display: inline-block;
+    text-align: center;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 0;
+    border-radius: 5px;
+    margin-top: 20px; /* Добавляем отступ сверху */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+.error {
+    color: #ff0000;
+    font-size: 0.8em;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.form-check label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.toggleWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 70px; /* Ширина контейнера чуть увеличена */
+    height: 28px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.toggleWrapper input {
+    opacity: 0; 
+    width: 0;
+    height: 0;
+}
+
+.toggleWrapper label {
+    position: relative;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    border-radius: 20px;
+    background-color: #ddd;
+    transition: background-color 0.2s ease;
+}
+
+.toggleWrapper label:before {
+    content: "";
+    position: absolute;
+    width: 24px; /* Немного уменьшили ширину кружка */
+    height: 24px; /* Немного уменьшили высоту кружка */
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s ease;
+}
+
+.toggleWrapper input:checked + label {
+    background-color: #2ecc71;
+}
+
+.toggleWrapper input:checked + label:before {
+    transform: translateX(24px); /* Увеличили смещение вправо для кружка */
+}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'create.css' %}">
+<h1>ADD NEW PRODUCT</h1>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.name }} <br>
+    {{ form.y_sku }} <br>
+    {{ form.ozon_sku }} <br>
+    {{ form.wb_sku }} <br>
+    <div class="form-group">
+        {{ form.stock }}
+    </div>
+    <div class="form-group">
+        {{ form.city }}
+    </div>
+    <div class="form-group form-check">
+        <label for="{{ form.is_sync.id_for_label }}">Синхронизировать</label>
+        <div class="toggleWrapper">
+            {{ form.is_sync }}
+            <label for="{{ form.is_sync.id_for_label }}"></label>
+        </div>
+    </div>    
+    <span class="error">{{ error }}</span>
+    <button class="btn-success" type="submit">Добавить товар</button>
+    <a href="{% url 'home' %}">
+        <button type="button" class="btn-primary">Назад к товарам</button>
+    </a>
+</form>
+{% endblock %}

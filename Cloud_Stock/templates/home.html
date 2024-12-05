@@ -1,0 +1,174 @@
+{% load static %}
+{% load get_stock_for_city %}
+{% load custom_filters %}
+
+<link rel="stylesheet" href="{% static 'home.css' %}?v=3">
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Stock</title>
+    <link rel="stylesheet" href="{% static 'home.css' %}">
+    <script src="{% static 'home.js' %}" defer></script>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+<header>
+    <h1>Cloud Stock</h1>
+</header>
+<div class="sub-navbar">
+    <form method="get" action="{% url 'home' %}" id="filter-form">
+        <select id="city" name="city" class="form-control" onchange="this.form.submit()">
+            <option value="all" {% if request.GET.city == 'all' %}selected{% endif %}>Все склады</option>
+            {% for city in cities %}
+                <option value="{{ city.0 }}" {% if city.0 == request.GET.city %}selected{% endif %}>{{ city.1 }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+{% if product_stock %}
+<div class="table-container">
+    <div class="add-search-container">
+        <input type="text" id="search-input" placeholder="Поиск по названию...">
+
+        <div class="pull-ozon-container">
+            <form method="get" action="{% url 'pull_ozon_stocks' %}">
+                {% csrf_token %}
+                <button type="submit">Вытянуть остатки с озона</button>
+            </form>
+        </div>
+
+        <a href="{% url 'create' %}">
+            <button>Добавить товар</button>
+        </a>
+    </div>
+    <form id="batch-edit-form" method="post" action="{% url 'user_stock_update' %}">
+        {% csrf_token %}
+        <input type="hidden" name="city" value="{{ selected_city }}">
+        <table id="dynamic-table">
+            <thead>
+                <tr>
+                    <th>Наименование</th>
+                    {% if selected_city == 'all' %}
+                        {% for city in cities %}
+                            <th>
+                                {% if city.1 == 'Казань' %}
+                                    КЗН
+                                {% elif city.1 == 'Краснодар' %}
+                                    КНД
+                                {% elif city.1 == 'Нижний Новгород' %}
+                                    НН
+                                {% elif city.1 == 'Екатеринбург' %}
+                                    ЕКБ
+                                {% else %}
+                                    {{ city.1 }}
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    {% else %}
+                        <th>Остаток</th>
+                        <th>Авито</th>
+                        <th>Озон</th>
+                        <th>ЯМ</th>
+                        <th>ВБ</th>
+                        <th>Город</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% if selected_city == 'all' %}
+                    {% for product_name, stock_data in product_stock.items %}
+                    <tr>
+                        <td>{{ product_name }}</td>
+                        {% for city in cities %}
+                            <td>{{ stock_data|get_item:city.0|default_if_none:"0" }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    {% for product in product_stock %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'update' pk=product.pk %}?city={{ selected_city }}">{{ product.name }}</a>
+                        </td>
+                        <td class="stock-cell">
+                            <span class="stock-value">{{ product.stock }}</span>
+                            <input type="number" min="0" name="stocks_{{ product.pk }}" value="{{ product.stock }}" class="stock-input" style="display: none;">
+                        </td>   
+                        <td class="avito-cell">
+                            <span class="avito-value">{{ product.avito_reserved }}</span>
+                            <input type="number" min="0" name="avito_{{ product.pk }}" value="{{ product.avito_reserved }}" class="avito-input" style="display: none;">
+                        </td>
+                        <td>{{ product.ozon_reserved }}</td>
+                        <td>{{ product.y_reserved }}</td>
+                        <td>{{ product.wb_reserved }}</td>
+                        <td>{{ product.city }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </form>
+</div>
+{% else %}
+<p>Нет данных для отображения.</p>
+{% endif %}
+
+<div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Подтвердить изменения?</h2>
+        <div id="modal-changes" class="modal-changes"></div>
+        <div class="modal-buttons">
+            <button id="confirm-save">Да</button>
+            <button id="cancel-save">Нет</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+{% comment %} <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stockCells = document.querySelectorAll('.stock-cell');
+    
+        stockCells.forEach(cell => {
+            const stockValue = cell.querySelector('.stock-value');
+            const stockInput = cell.querySelector('.stock-input');
+    
+            // При клике на ячейку, скрываем значение и показываем input
+            cell.addEventListener('click', function() {
+                stockValue.style.display = 'none';
+                stockInput.style.display = 'inline';
+                stockInput.focus();
+            });
+    
+            // При потере фокуса возвращаем отображение значения
+            stockInput.addEventListener('blur', function() {
+                applyChanges(stockInput, stockValue);
+            });
+    
+            // Добавляем обработчик нажатия клавиш
+            stockInput.addEventListener('keydown', function(event) {
+                // Проверяем, нажата ли клавиша пробела (код 32) или клавиша Enter (код 13)
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Предотвращаем стандартное действие (например, нажатие пробела)
+                    applyChanges(stockInput, stockValue);
+                    document.getElementById('batch-edit-form').submit(); // Отправка формы при нажатии Enter
+                }
+            });
+        });
+    
+        // Функция для применения изменений
+        function applyChanges(inputElement, valueElement) {
+            valueElement.textContent = inputElement.value; // Обновляем текст
+            valueElement.style.display = 'inline'; // Показываем значение
+            inputElement.style.display = 'none'; // Скрываем input
+        }
+    });
+    </script> {% endcomment %}

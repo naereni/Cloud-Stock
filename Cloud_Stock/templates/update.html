@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'update.css' %}">
+<h1>Редактировать {{ form.instance.title }}</h1>
+
+<div class="container">
+    <!-- Форма редактирования -->
+    <div class="form-container">
+        <form id="product-form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="button-container">
+                <a href="{% url 'home' %}?city={{ city }}" class="btn btn-primary">Назад</a>
+                <a href="{% url 'delete' form.instance.pk %}" class="btn btn-danger">Удалить</a>
+                <button type="submit" class="btn btn-success">Сохранить</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Информация об изменениях -->
+    <div class="info-container">
+        <h2>Информация об изменениях</h2>
+        <p><strong>Последний пользователь:</strong> {{ form.instance.last_user }}</p>
+        <p><strong>Последнее изменение:</strong> {{ form.instance.last_time }}</p>
+        <p><strong>Последнее значение остатка:</strong> {{ form.instance.prev_stock }}</p>
+    </div>
+</div>
+
+<script src="{% static 'update.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Применение стилей к полям формы
+        const formGroups = document.querySelectorAll('#product-form p');
+        formGroups.forEach(group => {
+            group.classList.add('form-group');
+            const label = group.querySelector('label');
+            const input = group.querySelector('input, select, textarea');
+            if (label) label.classList.add('form-label');
+            if (input) input.classList.add('form-input');
+        });
+
+        // Скрытие полей резервов и SKU
+        const fieldsToHide = ["city", 'reserve_ya', 'reserve_ozon', 'reserve_wb', 'y_reserved', 'ozon_reserved', 'wb_reserved'];
+        fieldsToHide.forEach(name => {
+            const field = document.querySelector(`input[name="${name}"]`);
+            if (field) field.closest('p').style.display = 'none';
+        });
+
+        // Перевод названий полей на русский язык
+        const labels = {
+            'name': 'Наименование',
+            'city': 'Город',
+            'stock': 'Остаток',
+            'is_sync': 'Синхронизировать'
+        };
+        Object.keys(labels).forEach(name => {
+            const label = document.querySelector(`label[for="id_${name}"]`);
+            if (label) label.textContent = labels[name];
+        });
+
+        // Создание кастомного переключателя для синхронизации
+        const syncField = document.querySelector('input[name="is_sync"]');
+        if (syncField) {
+            syncField.style.display = 'none'; // Скрываем оригинальный чекбокс
+
+            const toggleWrapper = document.createElement('div');
+            toggleWrapper.classList.add('toggleWrapper');
+
+            const toggleInput = document.createElement('input');
+            toggleInput.type = 'checkbox';
+            toggleInput.classList.add('dn');
+            toggleInput.id = 'syncToggle';
+            toggleInput.checked = syncField.checked;
+
+            const toggleLabel = document.createElement('label');
+            toggleLabel.classList.add('toggle');
+            toggleLabel.setAttribute('for', 'syncToggle');
+
+            const toggleHandler = document.createElement('span');
+            toggleHandler.classList.add('toggle__handler');
+
+            toggleLabel.appendChild(toggleHandler);
+            toggleWrapper.appendChild(toggleInput);
+            toggleWrapper.appendChild(toggleLabel);
+
+            syncField.parentNode.insertBefore(toggleWrapper, syncField.nextSibling);
+
+            toggleInput.addEventListener('change', function() {
+                syncField.checked = toggleInput.checked;
+            });
+        }
+    });
+</script>
+{% endblock %}

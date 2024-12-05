@@ -1,0 +1,11 @@
+[Unit]
+Description=Cloud Stock uptime
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c 'cd /home/dev/Cloud-stock && /home/dev/Cloud-stock/venv/bin/python -m celery -A Cloud_Stock beat --loglevel=info > /home/dev/Cloud-stock/logs/celery.log 2>&1 < /home/dev/Cloud-stock/logs/celery.log'
+Restart=always
+User=dev
+
+[Install]
+WantedBy=multi-user.target

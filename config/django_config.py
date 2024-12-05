@@ -1,0 +1,4 @@
+DJANGO_SECRET_KEY = ""
+DJANGO_DEBUG = True
+
+USERS = []

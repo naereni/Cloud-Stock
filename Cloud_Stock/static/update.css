@@ -1,0 +1,197 @@
+/* Основные стили для страницы */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для контейнера формы редактирования */
+.form-container {
+    flex: 2;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+    margin-bottom: 25px; /* Добавлено расстояние между формой и кнопками */
+    margin-bottom: 20px; /* Updated margin */
+}
+
+/* Стили для контейнера с информацией об изменениях */
+.info-container {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    justify-content: space-between;
+    margin-top: 20px; /* Updated margin */
+}
+
+/* Стили для групп полей формы */
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Стили для надписей в форме */
+.form-label {
+    display: inline-block;
+    width: 150px;
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+/* Стили для полей ввода */
+.form-input {
+    width: calc(100% - 160px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Стили для контейнера чекбокса синхронизации */
+.sync-container {
+    display: flex;
+    align-items: center; /* Выравнивание по вертикали */
+    gap: 10px; /* Отступ между чекбоксом и текстом */
+    margin-bottom: 15px;
+}
+
+/* Стили для переключателя */
+.toggleWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+/* Скрытие стандартного чекбокса */
+.dn {
+    display: none;
+}
+
+/* Стили для переключателя */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+/* Стили для индикатора переключателя */
+.toggle__handler {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+/* Включенное состояние */
+.dn:checked + .toggle {
+    background-color: #4CAF50;
+}
+
+.dn:checked + .toggle .toggle__handler {
+    transform: translateX(26px);
+}
+
+/* Стили для кнопок */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    box-sizing: border-box;
+    padding: 10px 20px; /* Updated padding */
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Стили для контейнера кнопок */
+.button-container {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-start;
+    text-align: center;
+    display: flex;
+    justify-content: space-between; /* Updated justification */
+}
+
+.button-container .btn {
+    margin: 0 5px;
+    flex: 1;
+    cursor: pointer;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-container .btn:last-child {
+    margin-right: 0;
+}
+
