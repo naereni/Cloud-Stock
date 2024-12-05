@@ -1,0 +1,4 @@
+config/api_config.py export-ignore
+config/wh.py export-ignore
+config/django_config.py export-ignore
+"config/Cloud Stock - preload_data - Артикулы.csv" export-ignore
