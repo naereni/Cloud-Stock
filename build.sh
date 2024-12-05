@@ -72,6 +72,8 @@ elif [[ "$mode" == "dev" ]]; then
     wait
 
 elif [[ "$mode" == "deploy" ]]; then
+    sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
+
     source /home/dev/Cloud-Stock/venv/bin/activate
     pip install -r requirements.txt
     create_logs
@@ -82,7 +84,6 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
     python manage.py load_stocks
 
-    sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_worker.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_beat.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/gunicorn.service
