@@ -1,6 +1,6 @@
 [Unit]
-Description=cs_gunicorn daemon
-Requires=cs_gunicorn.socket
+Description=gunicorn daemon
+Requires=gunicorn.socket
 After=network.target
 
 [Service]
@@ -10,7 +10,7 @@ WorkingDirectory=/home/dev/Cloud-stock
 ExecStart=/home/dev/Cloud-stock/venv/bin/gunicorn \
         --access-logfile /home/dev/Cloud-stock/logs/gunicorn-access.log \
         --error-logfile /home/dev/Cloud-stock/logs/gunicorn-error.log \
-        --workers 3 --bind unix:/run/cs_gunicorn.sock Cloud_Stock.wsgi:application
+        --workers 3 --bind unix:/run/gunicorn.sock Cloud_Stock.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
