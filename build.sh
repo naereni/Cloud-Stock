@@ -74,6 +74,7 @@ elif [[ "$mode" == "dev" ]]; then
 elif [[ "$mode" == "deploy" ]]; then
     sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
 
+    cd /home/dev/Cloud-Stock
     source /home/dev/Cloud-Stock/venv/bin/activate
     pip install -r requirements.txt
     create_logs
