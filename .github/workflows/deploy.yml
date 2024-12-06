@@ -32,7 +32,7 @@ jobs:
         SERVER_IP: ${{ secrets.SERVER_IP }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
       run: |
-        rsync -av --exclude 'config' -e "ssh -i ~/.ssh/id_rsa" ./* $SERVER_USER@$SERVER_IP:/home/dev/Cloud-Stock
+        rsync -av --no-times --exclude 'config' -e "ssh -i ~/.ssh/id_rsa" ./* $SERVER_USER@$SERVER_IP:/home/dev/Cloud-Stock
         
 
     - name: Restart service on server
