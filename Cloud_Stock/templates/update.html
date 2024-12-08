@@ -21,10 +21,18 @@
 
     <!-- Информация об изменениях -->
     <div class="info-container">
-        <h2>Информация об изменениях</h2>
-        <p><strong>Последний пользователь:</strong> {{ form.instance.last_user }}</p>
-        <p><strong>Последнее изменение:</strong> {{ form.instance.last_time }}</p>
-        <p><strong>Последнее значение остатка:</strong> {{ form.instance.prev_stock }}</p>
+        <h2>История изменений</h2>
+        <ul>
+            {% for record in history|slice:":5" %}
+                <li>
+                    <p><strong>Время:</strong> {{ record.timestamp }}</p>
+                    <p><strong>Пользователь:</strong> {{ record.user }}</p>
+                    <p><strong>Новый остаток:</strong> {{ record.new_stock }}</p>
+                </li>
+            {% empty %}
+                <li>Нет доступных изменений.</li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 

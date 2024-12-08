@@ -1,8 +1,9 @@
-from api.services.Ozon import ozon
-from api.services.Ymarket import ymarket
-from api.services.WB import wb
-from config.wh import ozon_whs, y_whs, wb_whs
 from django.core.management.base import BaseCommand
+
+from api.services.Ozon import ozon
+from api.services.WB import wb
+from api.services.Ymarket import ymarket
+from config.wh import ozon_whs, wb_whs, y_whs
 
 
 class Command(BaseCommand):

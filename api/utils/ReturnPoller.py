@@ -1,13 +1,15 @@
 import asyncio
-from api.services.Ozon import ozon
-from api.services.Ymarket import ymarket
-from api.services.WB import wb
-from Cloud_Stock.models import Product
+
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
+
+from api.services.Ozon import ozon
+from api.services.WB import wb
+from api.services.Ymarket import ymarket
+from api.utils.CacheManager import CacheManager
+from api.utils.logger import logger
+from Cloud_Stock.models import Product
 from config.wh import y_whs
-from api.utils.CacheManager import CacheManager  # Подключаем CacheManager
-from api.utils.OrderPoller import logger
 
 
 class ReturnPoller:
@@ -28,14 +30,11 @@ class ReturnPoller:
                 )
                 obj.stock += quantity
                 obj.is_modified = True
-                obj.last_user = "ReturnProcessor"
+                obj.last_user = "RTP"
                 await sync_to_async(obj.save)()
-                logger.warning(
-                    f"Updated product: {obj.name}, new stock: {obj.stock}, SKU: {sku}, "
-                    f"quantity increased by {quantity}"
-                )
+                logger.info(f"RTP: {obj.name}, new stock: {obj.stock}, SKU: {sku}")
             except ObjectDoesNotExist:
-                logger.warning(f"Product not found for return order: SKU {sku}, Warehouse {warehouse_id}")
+                logger.warning(f"RTP: Product not found for return order: SKU {sku}, Warehouse {warehouse_id}")
 
     async def fetch_ozon_returns(self):
         ozon_returned_orders = await ozon.pull_returned()
@@ -53,7 +52,11 @@ class ReturnPoller:
         for i, city_orders in enumerate(ymarket_returned_orders):
             for order in city_orders.get("orders", []):
                 for item in order.get("items", []):
-                    await self.save_return_to_db(warehouse_id=y_whs[i], sku=item["offerId"], quantity=item["count"])
+                    await self.save_return_to_db(
+                        warehouse_id=y_whs[i],
+                        sku=item["offerId"],
+                        quantity=item["count"],
+                    )
 
     async def fetch_wb_returns(self):
         wb_orders_results = await wb.pull_new_orders()
@@ -62,7 +65,11 @@ class ReturnPoller:
         for order in wb_orders_results.get("orders", []):
             if order["wbStatus"] == "canceled":
                 for sku in order["skus"]:
-                    await self.save_return_to_db(warehouse_id=order["warehouseId"], sku=sku, quantity=1)
+                    await self.save_return_to_db(
+                        warehouse_id=order["warehouseId"],
+                        sku=sku,
+                        quantity=1,
+                    )
 
     async def poll(self):
         await asyncio.gather(

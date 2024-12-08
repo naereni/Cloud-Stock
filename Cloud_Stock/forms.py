@@ -1,6 +1,7 @@
 from django import forms
-from .models import Product
+
 from .custom_clearable_file_input import CustomClearableFileInput
+from .models import Product
 
 
 class ProductForm(forms.ModelForm):

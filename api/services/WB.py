@@ -1,6 +1,7 @@
-from config.api_config import WB_config
 import requests
+
 from api.utils.session_manager import SessionManager
+from config.api_config import WB_config
 
 
 class WB:

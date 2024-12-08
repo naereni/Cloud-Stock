@@ -1,8 +1,10 @@
-from config.api_config import Ozon_config
-from datetime import datetime, timedelta
-import requests
 import json
+from datetime import datetime, timedelta
+
+import requests
+
 from api.utils.session_manager import SessionManager
+from config.api_config import Ozon_config
 
 
 class Ozon:

@@ -1,7 +1,9 @@
 from __future__ import absolute_import, unicode_literals
+
 import os
-from celery import Celery
 from datetime import timedelta
+
+from celery import Celery
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Cloud_Stock.settings")
 app = Celery("Cloud_Stock")
@@ -19,10 +21,10 @@ app.conf.beat_schedule = {
         "task": "api.tasks.polling_reserved",
         "schedule": timedelta(seconds=10),
     },
-    # "update-stocks": {
-    #     "task": "api.tasks.update_stocks",
-    #     "schedule": timedelta(seconds=120),
-    # },
+    "push-stocks": {
+        "task": "api.tasks.pushing_stocks",
+        "schedule": timedelta(seconds=10),
+    },
     "poll-returned": {
         "task": "api.tasks.polling_returned",
         "schedule": timedelta(seconds=10),

@@ -1,13 +1,14 @@
-from django.urls import reverse, reverse_lazy
-from django.views.generic import UpdateView, DeleteView
-from django.shortcuts import render, redirect
 from django.contrib import messages
-from Cloud_Stock.forms import LoginForm, ProductForm, SearchForm
-from Cloud_Stock.decorators import login_required
-from Cloud_Stock.models import Product
-from api.views import markets_stock_update
-from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views.generic import DeleteView, UpdateView
+
+from api.views import markets_stock_update
+from Cloud_Stock.decorators import login_required
+from Cloud_Stock.forms import LoginForm, ProductForm, SearchForm
+from Cloud_Stock.models import Product
 
 
 @login_required
@@ -88,9 +89,15 @@ class InfoUpdateView(UpdateView):
     template_name = "update.html"
     form_class = ProductForm
 
+    def form_valid(self, form):
+        product = form.save(commit=False)
+        product.last_user = self.request.user.username
+        return super().form_valid(form)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["city"] = self.request.GET.get("city", "all")
+        context["history"] = self.object.history
         return context
 
     def get_success_url(self):

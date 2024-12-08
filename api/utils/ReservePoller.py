@@ -1,13 +1,14 @@
 import asyncio
-from api.services.Ozon import ozon
-from api.services.Ymarket import ymarket
-from api.services.WB import wb
-from config.wh import y_whs, warehouses
-from Cloud_Stock.models import Product
-from api.utils.CacheManager import CacheManager
+
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
+
+from api.services.WB import wb
+from api.services.Ymarket import ymarket
+from api.utils.CacheManager import CacheManager
 from api.utils.OrderPoller import logger
+from Cloud_Stock.models import Product
+from config.wh import y_whs
 
 
 class ReservePoller:
@@ -20,8 +21,6 @@ class ReservePoller:
         for obj in await sync_to_async(list)(Product.objects.filter(y_reserved__gt=0)):
             obj.y_reserved = 0
             await sync_to_async(obj.save)()
-
-        await asyncio.sleep(0)
 
         ymarket_orders_results = await asyncio.gather(*tasks)
         for i, city in enumerate(ymarket_orders_results):
@@ -36,7 +35,7 @@ class ReservePoller:
                         # logger.warning(f"ya Reserve: {item['offerId']}, {list(warehouses.keys())[i]}, {item['count']}")
                         await sync_to_async(obj.save)()
                     except ObjectDoesNotExist:
-                        logger.warning("Reserve: Не найден товар ya", item["offerId"], y_whs[i])
+                        logger.warning("RSP: Не найден товар ya", item["offerId"], y_whs[i])
 
     async def pull_wb_reserved(self):
         wb_orders_results = await wb.pull_new_orders()
@@ -53,11 +52,11 @@ class ReservePoller:
                         obj.wb_reserved += 1
                         await sync_to_async(obj.save)()
                     except ObjectDoesNotExist:
-                        logger.warning("Reserve: Не найден товар wb", sku)
+                        logger.warning("RSP: Не найден товар wb", sku)
 
     async def poll(self):
         await asyncio.gather(
-            # self.pull_ozon_reserved(), потому что резерв ставиться из OrderPoller
+            # озона нет потому что резерв ставиться из OrderPoller
             self.pull_ymarket_reserved(),
             self.pull_wb_reserved(),
         )

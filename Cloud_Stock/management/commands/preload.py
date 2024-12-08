@@ -1,5 +1,7 @@
 import csv
+
 from django.core.management.base import BaseCommand
+
 from Cloud_Stock.models import Product
 from config.wh import warehouses
 
@@ -33,6 +35,7 @@ class Command(BaseCommand):
                         y_warehouse=warehouses[city]["ymarket"],
                         ozon_warehouse=warehouses[city]["ozon"],
                         wb_warehouse=warehouses[city]["wb"],
+                        is_sync=True if row["Название для заявки"] == "Кровать Мила V32 160х200" else False,
                     )
 
         self.stdout.write(self.style.SUCCESS("Successfully imported products"))

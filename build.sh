@@ -9,7 +9,9 @@ fi
 export CELERY_LOG="$LOG_DIR/celery.log"
 
 create_logs() {
-    rm "$LOG_DIR/*"
+    rm "$LOG_DIR/celery.log"
+    rm "$LOG_DIR/gunicorn-access.log"
+    rm "$LOG_DIR/gunicorn-error.log"
     touch "$CELERY_LOG"
     echo "Created $CELERY_LOG"
 }
@@ -63,7 +65,7 @@ elif [[ "$mode" == "dev" ]]; then
     python manage.py migrate
     python manage.py create_users
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
-    python manage.py load_stocks
+    # python manage.py load_stocks
     redis-server &
     python manage.py runserver &
     celery -A Cloud_Stock worker -l INFO &
