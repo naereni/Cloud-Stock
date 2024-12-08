@@ -65,7 +65,7 @@ elif [[ "$mode" == "dev" ]]; then
     python manage.py migrate
     python manage.py create_users
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
-    # python manage.py load_stocks
+    python manage.py load_stocks
     redis-server &
     python manage.py runserver &
     celery -A Cloud_Stock worker -l INFO &
