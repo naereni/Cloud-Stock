@@ -88,7 +88,7 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py create_users
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
     python manage.py load_stocks
-    systemctl start redis
+    sudo systemctl start redis
     python manage.py prefill_cache
     sudo systemctl link /home/dev/Cloud-stock-health-bot/clhb.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_worker.service
