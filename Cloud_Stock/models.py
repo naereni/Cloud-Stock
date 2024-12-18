@@ -50,7 +50,7 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, need_history=None, *args, **kwargs):
         if self.is_complement:
             try:
                 complement_obj = Product.objects.get(name=self.name.split(" / ")[0], city=self.city)
@@ -75,6 +75,6 @@ class Product(models.Model):
             timezone.now() + timedelta(hours=3),
             "d.m.Y H:i:s",
         )
-        # if not need_log:
-        self.add_to_history(self.last_user, self.stock)
+        if not need_history:
+            self.add_to_history(self.last_user, self.stock)
         super().save(*args, **kwargs)

@@ -67,6 +67,7 @@ elif [[ "$mode" == "dev" ]]; then
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
     python manage.py load_stocks
     redis-server &
+    python manage.py prefill_cache
     python manage.py runserver &
     celery -A Cloud_Stock worker -l INFO &
     celery -A Cloud_Stock beat --loglevel=info &
@@ -87,14 +88,15 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py create_users
     python manage.py preload "config/Cloud Stock - preload_data - Артикулы.csv"
     python manage.py load_stocks
-
+    systemctl start redis
+    python manage.py prefill_cache
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_worker.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_beat.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/gunicorn.service
     sudo ln -sf /home/dev/Cloud-Stock/systemd_services/cs_nginx_conf /etc/nginx/sites-available/
     sudo ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
     sudo systemctl daemon-reload
-    sudo systemctl start redis gunicorn gunicorn.socket celery_worker.service celery_beat.service nginx
+    sudo systemctl start gunicorn gunicorn.socket celery_worker.service celery_beat.service nginx
 
 else
     echo "Invalid argument: $mode. Use 'dev' or 'deploy'."

@@ -33,7 +33,7 @@ class ReservePoller:
                         )
                         obj.y_reserved = item["count"]
                         # logger.warning(f"ya Reserve: {item['offerId']}, {list(warehouses.keys())[i]}, {item['count']}")
-                        await sync_to_async(obj.save)()
+                        await sync_to_async(obj.save)(need_history=False)
                     except ObjectDoesNotExist:
                         logger.warning("RSP: Не найден товар ya", item["offerId"], y_whs[i])
 
@@ -50,7 +50,7 @@ class ReservePoller:
                             wb_sku=sku,
                         )
                         obj.wb_reserved += 1
-                        await sync_to_async(obj.save)()
+                        await sync_to_async(obj.save)(need_history=False)
                     except ObjectDoesNotExist:
                         logger.warning("RSP: Не найден товар wb", sku)
 

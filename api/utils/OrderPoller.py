@@ -39,18 +39,19 @@ class OrderPoller:
                 if item["reserved"] != 0:
                     product.ozon_reserved = item["reserved"]
                     reserved_count += 1
+                    await sync_to_async(product.save)(need_history=False)
                 if stock_change != 0:
                     product.stock = max(0, product.stock + stock_change)
                     product.prev_ozon_stock = item["present"]
                     product.is_modified = True
                     product.last_user = "ORPO"
                     diff_count += 1
-                    logger.debug(f"ORPO: {product.name} - {product.prev_stock}->{product.stock}")
+                    logger.debug(f"ORPO: Change {product.name} - {product.prev_stock}->{product.stock}")
                     if product.name == "Кровать Мила V32 160х200":
                         await tglog(
                             f"🔵ПОЛУЧЕНИЕ\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nRES OYW: {product.ozon_reserved}|{product.y_reserved}|{product.wb_reserved}\nHistory \n{"\n".join(["-".join([t["timestamp"][11:],t["user"],str(t["new_stock"])]) for t in product.history])}"
                         )
-                await sync_to_async(product.save)()
+                    await sync_to_async(product.save)()
             except ObjectDoesNotExist:
                 logger.warning(
                     f"ORP: Не найден товар ozon SKU:{item['sku']}, Warehouse:{item['warehouse_id']}, Item:{item['present']}"
@@ -81,7 +82,7 @@ class OrderPoller:
                             await sync_to_async(product.save)()
                             diff_count += 1
 
-                            logger.debug(f"ORPY: {product.name} - {product.prev_stock}->{product.stock}")
+                            logger.debug(f"ORPY: Change {product.name} - {product.prev_stock}->{product.stock}")
                             if product.name == "Кровать Мила V32 160х200":
                                 await tglog(
                                     f"🟡ПОЛУЧЕНИЕ\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nRES OYW: {product.ozon_reserved}|{product.y_reserved}|{product.wb_reserved}\nHistory \n{"\n".join(["-".join([t["timestamp"][11:],t["user"],str(t["new_stock"])]) for t in product.history])}"
@@ -108,7 +109,7 @@ class OrderPoller:
                         product.is_modified = True
                         product.last_user = "ORPW"
                         await sync_to_async(product.save)()
-                        logger.debug(f"ORPW: {product.name} - {product.prev_stock}->{product.stock}")
+                        logger.debug(f"ORPW: Change {product.name} - {product.prev_stock}->{product.stock}")
                         if product.name == "Кровать Мила V32 160х200":
                             await tglog(
                                 f"🟣ПОЛУЧЕНИЕ\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nRES OYW: {product.ozon_reserved}|{product.y_reserved}|{product.wb_reserved}\nHistory \n{"\n".join(["-".join([t["timestamp"][11:],t["user"],str(t["new_stock"])]) for t in product.history])}"

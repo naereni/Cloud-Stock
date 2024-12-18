@@ -39,10 +39,9 @@ async def push_stocks():
         #     tasks.append(wb.update_stock(product.wb_sku, product.wb_warehouse, stock_wb))
 
         logger.info(f"Push OYW: {product.name}: {stock_ozon} | {stock_ymarket} | {stock_wb}")
-        if product.name == "Кровать Мила V32 160х200":
-            await tglog(
-                f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nRES OYW: {product.ozon_reserved}|{product.y_reserved}|{product.wb_reserved}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
-            )
+        await tglog(
+            f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nRES OYW: {product.ozon_reserved}|{product.y_reserved}|{product.wb_reserved}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
+        )
         product.is_modified = False
         await sync_to_async(product.save)()
     # await asyncio.gather(*tasks)
