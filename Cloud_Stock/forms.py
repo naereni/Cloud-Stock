@@ -15,9 +15,9 @@ class ProductForm(forms.ModelForm):
             "city",
             "stock",
             "y_reserved",
-            "ozon_reserved",  # Added field
-            "wb_reserved",  # Added field
-            "avito_reserved",  # Added field
+            "ozon_reserved",
+            "wb_reserved",
+            "avito_reserved",
             "is_sync",
         ]
         widgets = {
@@ -27,7 +27,7 @@ class ProductForm(forms.ModelForm):
             "wb_sku": forms.TextInput(attrs={"class": "form-control", "placeholder": "ВБ SKU"}),
             "city": forms.Select(attrs={"class": "form-control"}),
             "stock": forms.NumberInput(attrs={"class": "form-control", "placeholder": "Количество на складе"}),
-            "is_sync": forms.CheckboxInput(attrs={"class": "form-check"}),  # Применяем класс form-check
+            "is_sync": forms.CheckboxInput(attrs={"class": "form-check"}),
         }
 
     def __init__(self, *args, **kwargs):

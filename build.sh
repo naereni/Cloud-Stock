@@ -75,7 +75,7 @@ elif [[ "$mode" == "dev" ]]; then
     wait
 
 elif [[ "$mode" == "deploy" ]]; then
-    sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis
+    sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis clhb.service
 
     cd /home/dev/Cloud-Stock
     source /home/dev/Cloud-Stock/venv/bin/activate
@@ -90,13 +90,14 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py load_stocks
     systemctl start redis
     python manage.py prefill_cache
+    sudo systemctl link /home/dev/Cloud-stock-health-bot/clhb.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_worker.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_beat.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/gunicorn.service
     sudo ln -sf /home/dev/Cloud-Stock/systemd_services/cs_nginx_conf /etc/nginx/sites-available/
     sudo ln -sf /etc/nginx/sites-available/cs_nginx_conf /etc/nginx/sites-enabled/
     sudo systemctl daemon-reload
-    sudo systemctl start gunicorn gunicorn.socket celery_worker.service celery_beat.service nginx
+    sudo systemctl start gunicorn gunicorn.socket celery_worker.service celery_beat.service nginx clhb.service
 
 else
     echo "Invalid argument: $mode. Use 'dev' or 'deploy'."
