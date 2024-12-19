@@ -75,7 +75,7 @@ elif [[ "$mode" == "dev" ]]; then
     wait
 
 elif [[ "$mode" == "deploy" ]]; then
-    sudo systemctl stop celery_beat.service celery_worker.service gunicorn.service nginx redis clhb.service
+    sudo systemctl stop clhb.service celery_beat.service celery_worker.service gunicorn.service nginx redis 
 
     cd /home/dev/Cloud-Stock
     source /home/dev/Cloud-Stock/venv/bin/activate

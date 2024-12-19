@@ -53,9 +53,10 @@ class OrderPoller:
                         )
                     await sync_to_async(product.save)()
             except ObjectDoesNotExist:
-                logger.warning(
-                    f"ORP: Не найден товар ozon SKU:{item['sku']}, Warehouse:{item['warehouse_id']}, Item:{item['present']}"
-                )
+                if item["warehouse_id"] != 1020000632461000:
+                    logger.warning(
+                        f"ORP: Не найден товар ozon SKU:{item['sku']}, Warehouse:{item['warehouse_id']}, Item:{item['present']}"
+                    )
         logger.info(f"ORP: Ozon diff count: {diff_count}, reserved count: {reserved_count}")
 
     async def poll_ymarket_orders(self):
@@ -67,7 +68,6 @@ class OrderPoller:
         logger.info(f"ORP: Ymarket orders, orders={sum([len(city['orders']) for city in ymarket_orders_results])}")
         diff_count = 0
         for i, city in enumerate(ymarket_orders_results):
-            logger.debug(f"ORPY: {y_whs[i]} - {len(city['orders'])}")
             for order in city["orders"]:
                 if not self.cache.is_in_cache(str(order["id"])):
                     for item in order["items"]:
