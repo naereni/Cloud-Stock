@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 
 from Cloud_Stock.models import Product
 from config.wh import warehouses
+from config.django_config import DJANGO_DEBUG
 
 
 class Command(BaseCommand):
@@ -36,6 +37,7 @@ class Command(BaseCommand):
                         ozon_warehouse=warehouses[city]["ozon"],
                         wb_warehouse=warehouses[city]["wb"],
                         is_sync=True if row["Название для заявки"] == "Кровать Мила V32 160х200" else False,
+                        stock=10 if DJANGO_DEBUG else 0
                     )
 
         self.stdout.write(self.style.SUCCESS("Successfully imported products"))

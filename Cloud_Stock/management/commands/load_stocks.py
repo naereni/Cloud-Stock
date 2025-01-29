@@ -20,6 +20,7 @@ class Command(BaseCommand):
             print(f"Loading stocks: {i}/{ozon_stocks_len}", end="\r")
             try:
                 product = Product.objects.get(ozon_sku=item["sku"], ozon_warehouse=item["warehouse_id"])
+
                 product.stock = item["present"]
                 product.prev_ozon_stock = item["present"]
                 product.ozon_reserved = item["reserved"]

@@ -22,11 +22,11 @@ class ReturnPoller:
             try:
                 obj = await Product.objects.aget(
                     ozon_warehouse=warehouse_id if hasattr(Product, "ozon_warehouse") else None,
-                    wb_warehouse=warehouse_id if hasattr(Product, "wb_warehouse") else None,
-                    y_warehouse=warehouse_id if hasattr(Product, "y_warehouse") else None,
+                    # wb_warehouse=warehouse_id if hasattr(Product, "wb_warehouse") else None,
+                    # y_warehouse=warehouse_id if hasattr(Product, "y_warehouse") else None,
                     ozon_sku=sku if hasattr(Product, "ozon_sku") else None,
-                    y_sku=sku if hasattr(Product, "y_sku") else None,
-                    wb_sku=sku if hasattr(Product, "wb_sku") else None,
+                    # y_sku=sku if hasattr(Product, "y_sku") else None,
+                    # wb_sku=sku if hasattr(Product, "wb_sku") else None,
                 )
                 obj.stock += quantity
                 obj.is_modified = True
@@ -38,13 +38,12 @@ class ReturnPoller:
 
     async def fetch_ozon_returns(self):
         ozon_returned_orders = await ozon.pull_returned()
-        for order in ozon_returned_orders.get("result", {}).get("postings", []):
-            for item in order.get("products", []):
-                await self.save_return_to_db(
-                    warehouse_id=order["delivery_method"]["warehouse_id"],
-                    sku=item["sku"],
-                    quantity=item["quantity"],
-                )
+        for order in ozon_returned_orders.get("returns", {}):
+            await self.save_return_to_db(
+                warehouse_id=order["place"]["id"],
+                sku=order["product"]["sku"],
+                quantity=order["product"]["quantity"],
+            )
 
     async def fetch_ymarket_returns(self):
         tasks = [ymarket.pull_returned_orders(campaign_id) for campaign_id in y_whs]
@@ -74,8 +73,8 @@ class ReturnPoller:
     async def poll(self):
         await asyncio.gather(
             self.fetch_ozon_returns(),
-            self.fetch_ymarket_returns(),
-            self.fetch_wb_returns(),
+            # self.fetch_ymarket_returns(),
+            # self.fetch_wb_returns(),
         )
         self.cache.finalize_cycle()
 

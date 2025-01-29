@@ -17,7 +17,26 @@ class OrderPoller:
     def __init__(self):
         self.cache = CacheManager("Orders cache")
 
+    
     async def poll_ozon_orders(self):
+        ozon_orders_results = await ozon.pull_new_orders()
+        for posting in ozon_orders_results["result"]["postings"]:
+            if not self.cache.is_in_cache(str(posting["order_id"])):
+                for item in posting["products"]:
+                    try:
+                        product = await Product.objects.aget(
+                            ozon_warehouse=posting["delivery_method"]["warehouse_id"],
+                            ozon_sku=item["sku"],
+                        )
+                        product.stock = max(0, product.stock - item["quantity"])
+                        product.is_modified = True
+                        product.last_user = "Order poller ozon"
+                        logger.debug(f"ORPO: Change {product.name} - {product.prev_stock}->{product.stock}")
+                        await sync_to_async(product.save)()
+                    except ObjectDoesNotExist:
+                        logger.warning(f"Poll_order: Не найден товар ozon {item['sku']}")
+
+    async def poll_ozon_stocks(self):
         q = list(
             await sync_to_async(
                 lambda: list(
@@ -123,8 +142,8 @@ class OrderPoller:
     async def poll(self):
         await asyncio.gather(
             self.poll_ozon_orders(),
-            self.poll_ymarket_orders(),
-            self.poll_wb_orders(),
+            # self.poll_ymarket_orders(),
+            # self.poll_wb_orders(),
         )
         self.cache.finalize_cycle()
 

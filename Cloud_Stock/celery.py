@@ -17,16 +17,16 @@ app.conf.beat_schedule = {
         "task": "api.tasks.polling_orders",
         "schedule": timedelta(seconds=10),
     },
-    "poll-reserved": {
-        "task": "api.tasks.polling_reserved",
-        "schedule": timedelta(seconds=10),
-    },
-    "push-stocks": {
-        "task": "api.tasks.pushing_stocks",
-        "schedule": timedelta(seconds=10),
-    },
+    # "poll-reserved": {
+    #     "task": "api.tasks.polling_reserved",
+    #     "schedule": timedelta(seconds=10),
+    # },
     "poll-returned": {
         "task": "api.tasks.polling_returned",
         "schedule": timedelta(seconds=10),
     },
+    # "push-stocks": {
+    #     "task": "api.tasks.pushing_stocks",
+    #     "schedule": timedelta(seconds=10),
+    # },
 }
