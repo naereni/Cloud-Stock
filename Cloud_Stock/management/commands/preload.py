@@ -37,7 +37,7 @@ class Command(BaseCommand):
                         ozon_warehouse=warehouses[city]["ozon"],
                         wb_warehouse=warehouses[city]["wb"],
                         is_sync=True if row["Название для заявки"] == "Кровать Мила V32 160х200" else False,
-                        stock=10 if DJANGO_DEBUG else 0
+                        stock=10 if DJANGO_DEBUG and not "/" in row["Название для заявки"] else 0
                     )
 
         self.stdout.write(self.style.SUCCESS("Successfully imported products"))

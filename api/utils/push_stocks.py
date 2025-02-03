@@ -2,9 +2,9 @@ import asyncio
 
 from asgiref.sync import sync_to_async
 
-from api.services.Ozon import ozon
-from api.services.WB import wb
-from api.services.Ymarket import ymarket
+from api.markets.Ozon import ozon
+from api.markets.WB import wb
+from api.markets.Ymarket import ymarket
 from api.utils.logger import logger
 from api.utils.tglogger import tglog
 from Cloud_Stock.models import Product

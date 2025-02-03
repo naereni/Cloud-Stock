@@ -3,9 +3,9 @@ import asyncio
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 
-from api.services.Ozon import ozon
-from api.services.WB import wb
-from api.services.Ymarket import ymarket
+from api.markets.Ozon import ozon
+from api.markets.WB import wb
+from api.markets.Ymarket import ymarket
 from api.utils.CacheManager import CacheManager
 from api.utils.logger import logger
 from api.utils.tglogger import tglog
@@ -19,7 +19,7 @@ class OrderPoller:
 
     
     async def poll_ozon_orders(self):
-        ozon_orders_results = await ozon.pull_new_orders()
+        ozon_orders_results = await ozon.pull_orders()
         for posting in ozon_orders_results["result"]["postings"]:
             if not self.cache.is_in_cache(str(posting["order_id"])):
                 for item in posting["products"]:

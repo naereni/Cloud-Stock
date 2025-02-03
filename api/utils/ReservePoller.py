@@ -3,8 +3,8 @@ import asyncio
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 
-from api.services.WB import wb
-from api.services.Ymarket import ymarket
+from api.markets.WB import wb
+from api.markets.Ymarket import ymarket
 from api.utils.CacheManager import CacheManager
 from api.utils.OrderPoller import logger
 from Cloud_Stock.models import Product

@@ -1,9 +1,9 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 
-from api.services.Ozon import ozon
-from api.services.WB import wb
-from api.services.Ymarket import ymarket
+from api.markets.Ozon import ozon
+from api.markets.WB import wb
+from api.markets.Ymarket import ymarket
 from Cloud_Stock.models import Product
 
 

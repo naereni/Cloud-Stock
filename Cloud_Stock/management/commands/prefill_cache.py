@@ -1,7 +1,7 @@
 from typing import Any
 from django.core.management.base import BaseCommand
 from api.utils.CacheManager import CacheManager
-from api.services.Ymarket import ymarket
+from api.markets.Ymarket import ymarket
 import asyncio
 from config.wh import y_whs
 
