@@ -1,6 +1,5 @@
 from django import forms
 
-from .custom_clearable_file_input import CustomClearableFileInput
 from .models import Product
 
 
@@ -26,7 +25,9 @@ class ProductForm(forms.ModelForm):
             "ozon_sku": forms.TextInput(attrs={"class": "form-control", "placeholder": "Озон SKU"}),
             "wb_sku": forms.TextInput(attrs={"class": "form-control", "placeholder": "ВБ SKU"}),
             "city": forms.Select(attrs={"class": "form-control"}),
-            "stock": forms.NumberInput(attrs={"class": "form-control", "placeholder": "Количество на складе"}),
+            "stock": forms.NumberInput(
+                attrs={"class": "form-control", "placeholder": "Количество на складе"}
+            ),
             "is_sync": forms.CheckboxInput(attrs={"class": "form-check"}),
         }
 

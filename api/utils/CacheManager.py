@@ -48,7 +48,9 @@ class CacheManager:
     """
 
     def __init__(self, cache_key, redis_host="localhost", redis_port=6379, redis_db=0):
-        self.redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db, decode_responses=True)
+        self.redis_client = redis.StrictRedis(
+            host=redis_host, port=redis_port, db=redis_db, decode_responses=True
+        )
         self.cache_key = cache_key
         if cache_key == "test":
             cached_items = self.get_cache()

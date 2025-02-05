@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils import dateformat, timezone
 
-from api.utils.logger import logger
+from api.logger import log
 from config.wh import cities
 
 

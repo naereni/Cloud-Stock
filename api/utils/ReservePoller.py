@@ -3,10 +3,9 @@ import asyncio
 from asgiref.sync import sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 
-from api.markets.WB import wb
-from api.markets.Ymarket import ymarket
+from api.markets import ozon, ymarket, wb
 from api.utils.CacheManager import CacheManager
-from api.utils.OrderPoller import logger
+from api.utils.OrderPoller import log
 from Cloud_Stock.models import Product
 from config.wh import y_whs
 
@@ -35,7 +34,7 @@ class ReservePoller:
                         # logger.warning(f"ya Reserve: {item['offerId']}, {list(warehouses.keys())[i]}, {item['count']}")
                         await sync_to_async(obj.save)(need_history=False)
                     except ObjectDoesNotExist:
-                        logger.warning("RSP: Не найден товар ya", item["offerId"], y_whs[i])
+                        log.warning("RSP: Не найден товар ya", item["offerId"], y_whs[i])
 
     async def pull_wb_reserved(self):
         wb_orders_results = await wb.pull_new_orders()
@@ -52,7 +51,7 @@ class ReservePoller:
                         obj.wb_reserved += 1
                         await sync_to_async(obj.save)(need_history=False)
                     except ObjectDoesNotExist:
-                        logger.warning("RSP: Не найден товар wb", sku)
+                        log.warning("RSP: Не найден товар wb", sku)
 
     async def poll(self):
         await asyncio.gather(

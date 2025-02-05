@@ -18,6 +18,7 @@ create_logs() {
 
 # for stop dev mode
 cleanup() {
+    python manage.py close_connections
     kill -9 $(pgrep -f "celery") 1> /dev/null 2> /dev/null
     echo "Celery stopped"
     kill -9 $(pgrep -f "runserver") 1> /dev/null 2> /dev/null
@@ -51,6 +52,7 @@ fi
 mode="$1"
 
 if [[ "$mode" == "stop" ]]; then
+    python manage.py close_connections
     systemctl stop celery_worker.service
     systemctl stop celery_beat.service
     echo "Celery stopped"
@@ -82,6 +84,7 @@ elif [[ "$mode" == "deploy" ]]; then
     pip install -r requirements.txt
     create_logs
     rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    python manage.py close_connections
     python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock
     python manage.py migrate

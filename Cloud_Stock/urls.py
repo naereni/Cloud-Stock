@@ -4,8 +4,7 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 from api.views import pull_ozon_stocks, success_pull
-from Cloud_Stock.views import (InfoDeleteView, InfoUpdateView, create, home,
-                               login_view, user_stock_update)
+from Cloud_Stock.views import InfoDeleteView, InfoUpdateView, create, home, login_view, user_stock_update
 
 urlpatterns = [
     path("", RedirectView.as_view(url="login/")),
