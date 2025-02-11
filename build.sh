@@ -63,6 +63,7 @@ if [[ "$mode" == "stop" ]]; then
 
 elif [[ "$mode" == "dev" ]]; then
     rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    # python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock
     python manage.py migrate
     python manage.py create_users
@@ -71,8 +72,8 @@ elif [[ "$mode" == "dev" ]]; then
     redis-server &
     python manage.py prefill_cache
     python manage.py runserver &
-    celery -A Cloud_Stock worker -l INFO &
-    celery -A Cloud_Stock beat --loglevel=info &
+    celery -A Cloud_Stock worker --loglevel=warning &
+    celery -A Cloud_Stock beat --loglevel=warning &
 
     wait
 

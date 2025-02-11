@@ -10,7 +10,7 @@ class CacheManager:
 
     >>> cache_manager = CacheManager("test")
     >>> for i in ["----", "1", "2", "3"]:
-    ...     print(i, cache_manager.is_in_cache(i))
+    ...     print(i, cache_manager.check(i))
     ---- False
     1 False
     2 False
@@ -19,7 +19,7 @@ class CacheManager:
     >>> cache_manager.finalize_cycle()
 
     >>> for i in ["----", "1", "2", "3", "4"]:
-    ...     print(i, cache_manager.is_in_cache(i))
+    ...     print(i, cache_manager.check(i))
     ---- True
     1 True
     2 True
@@ -29,7 +29,7 @@ class CacheManager:
     >>> cache_manager.finalize_cycle()
 
     >>> for i in ["----", "5", "6", "3"]:
-    ...     print(i, cache_manager.is_in_cache(i))
+    ...     print(i, cache_manager.check(i))
     ---- True
     5 False
     6 False
@@ -38,7 +38,7 @@ class CacheManager:
     >>> cache_manager.finalize_cycle()
 
     >>> for i in ["----", 2, 3, 4, 5, 6]:
-    ...     print(str(i), cache_manager.is_in_cache(i))
+    ...     print(str(i), cache_manager.check(i))
     ---- True
     2 False
     3 True
@@ -58,7 +58,7 @@ class CacheManager:
                 self.redis_client.srem(self.cache_key, *cached_items)
         self.current_cycle_orders = set()
 
-    def is_in_cache(self, order_id):
+    def check(self, order_id):
         if self.redis_client.sismember(self.cache_key, order_id):
             self.redis_client.sadd(self.cache_key, order_id)
             self.current_cycle_orders.add(order_id)
@@ -71,7 +71,7 @@ class CacheManager:
     def get_cache(self):
         return self.redis_client.smembers(self.cache_key)
 
-    def finalize_cycle(self):
+    def end_cycle(self):
         """
         This function is called after the polling cycle completes.
         It removes cache entries that were present in the cache but did not appear in the current cycle.

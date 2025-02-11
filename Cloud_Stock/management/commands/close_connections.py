@@ -2,7 +2,7 @@ import asyncio
 
 from django.core.management.base import BaseCommand
 
-from api.markets import ozon, ymarket, wb
+from api.markets import ozon, wb, ymarket
 
 
 class Command(BaseCommand):

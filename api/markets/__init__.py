@@ -1,6 +1,6 @@
 from .Ozon import Ozon
-from .Ymarket import Ymarket
 from .WB import WB
+from .Ymarket import Ymarket
 
 ozon = Ozon()
 ymarket = Ymarket()

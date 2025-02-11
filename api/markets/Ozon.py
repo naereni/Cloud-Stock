@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from api.markets.Market import Market
+from api.markets.MetaMarket import Market
 from config.api_config import Ozon_config
 from config.django_config import DJANGO_DEBUG
 
@@ -72,12 +72,19 @@ class Ozon(Market):
 
         return await self._apost(endpoint, request_data)
 
-    async def get_stocks(self, skus: list):
+    def get_stocks(self, skus: list):
         endpoint = "v1/product/info/stocks-by-warehouse/fbs"
         request_data = {"sku": skus}
-        return await self._apost(endpoint, request_data)
+        return self._post(endpoint, request_data)
 
     def get_warehouses(self):
         endpoint = "v1/warehouse/list"
-        r = self._apost(endpoint)
+        r = self._post(endpoint)
         return [{"warehouse_id": house["warehouse_id"], "name": house["name"]} for house in r["result"]]
+
+# async def main():
+#     ozon = Ozon()
+#     r = ozon.get_warehouses()
+#     print("$$$$$$$$$",r)
+# import asyncio
+# asyncio.run(main())

@@ -3,8 +3,9 @@ from django.conf.urls.static import static
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from api.views import pull_ozon_stocks, success_pull
-from Cloud_Stock.views import InfoDeleteView, InfoUpdateView, create, home, login_view, user_stock_update
+from api.views import get_logs, pull_ozon_stocks, success_pull
+from Cloud_Stock.views import (InfoDeleteView, InfoUpdateView, create, home,
+                               login_view, user_stock_update)
 
 urlpatterns = [
     path("", RedirectView.as_view(url="login/")),
@@ -16,4 +17,5 @@ urlpatterns = [
     path("delete/<int:pk>/", InfoDeleteView.as_view(), name="delete"),
     path("pull_ozon_stocks/", pull_ozon_stocks, name="pull_ozon_stocks"),
     path("success_pull/", success_pull, name="success_pull"),
+    path("logs/", get_logs, name="logs"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

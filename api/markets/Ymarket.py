@@ -1,4 +1,4 @@
-from api.markets.Market import Market
+from api.markets.MetaMarket import Market
 from config.api_config import Ymarket_config
 from config.django_config import DJANGO_DEBUG
 
@@ -16,9 +16,9 @@ class Ymarket(Market):
         )
         self.business_id = Ymarket_config.business_id
 
-    async def pull_returned_orders(self, campaign_id):
+    async def pull_orders(self, campaign_id):
         endpoint = f"v2/campaigns/{campaign_id}/orders"
-        request_data = {"status": "RETURNED"}
+        request_data = {"status": "DELIVERED"}
         return await self._aget(endpoint, request_data)
 
     async def pull_reserved(self, campaign_id):
@@ -26,9 +26,9 @@ class Ymarket(Market):
         request_data = {"status": "PROCESSING", "substatus": "STARTED"}
         return await self._aget(endpoint, request_data)
 
-    async def pull_orders(self, campaign_id):
+    async def pull_returned(self, campaign_id):
         endpoint = f"v2/campaigns/{campaign_id}/orders"
-        request_data = {"status": "DELIVERED"}
+        request_data = {"status": "RETURNED"}
         return await self._aget(endpoint, request_data)
 
     async def pull_stocks(self, campaign_id, skus: list):
@@ -47,7 +47,7 @@ class Ymarket(Market):
 
 # async def main():
 #     ymarket = Ymarket()
-#     r = await ymarket.pull_orders("131709783")
-#     print(r)
+#     r = await ymarket.pull_returned_orders("131709783")
+#     print("$$$$$$$$$",r)
 # import asyncio
 # asyncio.run(main())

@@ -2,12 +2,13 @@ import asyncio
 
 from asgiref.sync import sync_to_async
 
-from api.logger import log, tglog
-from api.markets import ozon, ymarket, wb
-from Cloud_Stock.models import Product
+from api.markets import ozon, wb, ymarket
+from api.utils.logger import logger, tglog
 
 
 async def push_stocks():
+    from Cloud_Stock.models import Product
+
     modified_products = await sync_to_async(list)(Product.objects.filter(is_sync=True, is_modified=True))
 
     tasks = []
@@ -35,11 +36,10 @@ async def push_stocks():
         # if product.wb_sku and product.wb_warehouse:
         #     tasks.append(wb.update_stock(product.wb_sku, product.wb_warehouse, stock_wb))
 
-        log.info(f"Push OYW: {product.name}: {stock_ozon} | {stock_ymarket} | {stock_wb}")
+        logger.info(f"Push OYW: {product.name}: {stock_ozon} | {stock_ymarket} | {stock_wb}")
         await tglog(
             f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nOYW: {stock_ozon}|{stock_ymarket}|{stock_wb}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
         )
         product.is_modified = False
         await sync_to_async(product.save)()
     # await asyncio.gather(*tasks)
-    log.info("Stocks updated!")

@@ -2,10 +2,8 @@ import asyncio
 
 from celery import shared_task
 
-from api.utils.OrderPoller import order_poller
+from api.pollers import order_poller, reserve_poller, return_poller
 from api.utils.push_stocks import push_stocks
-from api.utils.ReservePoller import reserve_poller
-from api.utils.ReturnPoller import return_poller
 
 
 @shared_task
