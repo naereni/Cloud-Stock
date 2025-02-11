@@ -36,7 +36,7 @@ async def push_stocks():
         # if product.wb_sku and product.wb_warehouse:
         #     tasks.append(wb.update_stock(product.wb_sku, product.wb_warehouse, stock_wb))
 
-        logger.info(f"Push OYW: {product.name}: {stock_ozon} | {stock_ymarket} | {stock_wb}")
+        logger.info(f"Push OYW: {product.ozon_sku}: {stock_ozon} | {stock_ymarket} | {stock_wb}")
         await tglog(
             f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nOYW: {stock_ozon}|{stock_ymarket}|{stock_wb}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
         )
