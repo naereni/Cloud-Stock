@@ -29,8 +29,8 @@ app.conf.beat_schedule = {
         "task": "api.tasks.polling_returned",
         "schedule": timedelta(seconds=10),
     },
-    # "push-stocks": {
-    #     "task": "api.tasks.pushing_stocks",
-    #     "schedule": timedelta(seconds=10),
-    # },
+    "push-stocks": {
+        "task": "api.tasks.pushing_stocks",
+        "schedule": timedelta(seconds=10),
+    },
 }
