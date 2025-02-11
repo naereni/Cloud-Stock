@@ -162,3 +162,8 @@ cython_debug/
 #.idea/
 api/response_examples.py
 config/*
+Cloud_Stock/migrations
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+dump.rdb
+Cloud_Stock/static/admin

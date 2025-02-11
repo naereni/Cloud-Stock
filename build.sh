@@ -18,6 +18,7 @@ create_logs() {
 
 # for stop dev mode
 cleanup() {
+    python manage.py close_connections
     kill -9 $(pgrep -f "celery") 1> /dev/null 2> /dev/null
     echo "Celery stopped"
     kill -9 $(pgrep -f "runserver") 1> /dev/null 2> /dev/null
@@ -51,6 +52,7 @@ fi
 mode="$1"
 
 if [[ "$mode" == "stop" ]]; then
+    python manage.py close_connections
     systemctl stop celery_worker.service
     systemctl stop celery_beat.service
     echo "Celery stopped"
@@ -61,6 +63,7 @@ if [[ "$mode" == "stop" ]]; then
 
 elif [[ "$mode" == "dev" ]]; then
     rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    # python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock
     python manage.py migrate
     python manage.py create_users
@@ -69,8 +72,8 @@ elif [[ "$mode" == "dev" ]]; then
     redis-server &
     python manage.py prefill_cache
     python manage.py runserver &
-    celery -A Cloud_Stock worker -l INFO &
-    celery -A Cloud_Stock beat --loglevel=info &
+    celery -A Cloud_Stock worker --loglevel=warning &
+    celery -A Cloud_Stock beat --loglevel=warning &
 
     wait
 
@@ -82,6 +85,7 @@ elif [[ "$mode" == "deploy" ]]; then
     pip install -r requirements.txt
     create_logs
     rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    python manage.py close_connections
     python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock
     python manage.py migrate

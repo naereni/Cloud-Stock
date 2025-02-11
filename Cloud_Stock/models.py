@@ -22,7 +22,6 @@ class Product(models.Model):
     wb_warehouse = models.IntegerField(null=True)
 
     stock = models.IntegerField(default=0)
-    prev_ozon_stock = models.IntegerField(default=0)
     prev_stock = models.IntegerField(default=0)
 
     ozon_reserved = models.IntegerField(default=0)
@@ -37,6 +36,9 @@ class Product(models.Model):
     is_complement = models.BooleanField(default=False)
     history = models.JSONField(default=list)
 
+    def __str__(self):
+        return self.name
+
     def add_to_history(self, user, new_stock):
         timestamp = dateformat.format(timezone.now() + timedelta(hours=3), "d.m.Y H:i:s")
         history_entry = {
@@ -47,16 +49,13 @@ class Product(models.Model):
         self.history.insert(0, history_entry)
         # logger.info(f"Пользователь {user} изменил остаток товара {self.name} с {self.prev_stock} на {new_stock}")
 
-    def __str__(self):
-        return self.name
-
-    def save(self, need_history=None, *args, **kwargs):
+    def save(self, history=True, *args, **kwargs):
         if self.is_complement:
             try:
                 complement_obj = Product.objects.get(name=self.name.split(" / ")[0], city=self.city)
                 complement_obj.stock += self.stock - self.prev_stock
                 complement_obj.is_modified = True
-                complement_obj.last_user = "Poller-complement"
+                complement_obj.last_user = "COMP"
                 complement_obj.save()
             except ObjectDoesNotExist:
                 pass
@@ -65,7 +64,7 @@ class Product(models.Model):
                 complement_obj = Product.objects.get(name=self.name.split(" / ")[1], city=self.city)
                 complement_obj.stock += self.stock - self.prev_stock
                 complement_obj.is_modified = True
-                complement_obj.last_user = "Poller-complement"
+                complement_obj.last_user = "COMP"
                 complement_obj.save()
             except ObjectDoesNotExist:
                 pass
@@ -75,6 +74,8 @@ class Product(models.Model):
             timezone.now() + timedelta(hours=3),
             "d.m.Y H:i:s",
         )
-        if not need_history:
+
+        if history:
             self.add_to_history(self.last_user, self.stock)
+
         super().save(*args, **kwargs)
