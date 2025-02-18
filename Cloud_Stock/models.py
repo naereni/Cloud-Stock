@@ -48,12 +48,12 @@ class Product(models.Model):
         }
         self.history.append(history_entry)
 
-    def save(self, history=True, *args, **kwargs):
+    def save(self, history=True, is_mod=True, *args, **kwargs):
         if self.is_complement:
             try:
                 complement_obj = Product.objects.get(name=self.name.split(" / ")[0], city=self.city)
                 complement_obj.stock += self.stock - self.prev_stock
-                complement_obj.is_modified = True
+                complement_obj.is_modified = is_mod
                 complement_obj.last_user = "COMP"
                 complement_obj.save()
             except ObjectDoesNotExist:
@@ -62,7 +62,7 @@ class Product(models.Model):
             try:
                 complement_obj = Product.objects.get(name=self.name.split(" / ")[1], city=self.city)
                 complement_obj.stock += self.stock - self.prev_stock
-                complement_obj.is_modified = True
+                complement_obj.is_modified = is_mod
                 complement_obj.last_user = "COMP"
                 complement_obj.save()
             except ObjectDoesNotExist:

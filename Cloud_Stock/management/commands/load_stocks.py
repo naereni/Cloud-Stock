@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 product.stock = item["present"]
                 product.prev_ozon_stock = item["present"]
                 product.ozon_reserved = item["reserved"]
-                product.save()
+                product.save(is_mod=False)
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f"Error while load stocks for [{item["sku"]}, {item["warehouse_id"]}, {item["present"]}, {item["reserved"]}]: {e}"))
 
