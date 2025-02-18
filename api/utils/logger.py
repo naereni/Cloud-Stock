@@ -68,7 +68,7 @@ log_file_path = BASE_DIR / LOG_FILE
 file_handler = logging.handlers.RotatingFileHandler(
     log_file_path,
     mode="a",
-    encoding="UTF-8",
+    encoding="utf-8",
     maxBytes=1024 * 1024 * 1024,
 )
 file_handler.setFormatter(formatter)
