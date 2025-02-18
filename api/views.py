@@ -44,6 +44,6 @@ def get_logs(request):
     try:
         with open(LOG_FILE_PATH, "r", encoding="utf-8") as log_file:
             logs = log_file.readlines()
-        return HttpResponse("".join(logs), content_type="text/plain")
+        return HttpResponse("".join(logs[::-1]), content_type="text/plain")
     except Exception as e:
         return JsonResponse({"error": "Failed to read logs"}, status=500)
