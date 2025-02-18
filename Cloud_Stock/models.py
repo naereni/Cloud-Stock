@@ -46,8 +46,7 @@ class Product(models.Model):
             "user": user,
             "new_stock": new_stock,
         }
-        self.history.insert(0, history_entry)
-        # logger.info(f"Пользователь {user} изменил остаток товара {self.name} с {self.prev_stock} на {new_stock}")
+        self.history.append(history_entry)
 
     def save(self, history=True, *args, **kwargs):
         if self.is_complement:

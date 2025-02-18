@@ -42,8 +42,8 @@ def get_logs(request):
         return JsonResponse({"error": "Log file not found"}, status=404)
 
     try:
-        with open(LOG_FILE_PATH, "r") as log_file:
-            logs = log_file.readlines()[-500:]  # Возвращаем последние 100 строк
+        with open(LOG_FILE_PATH, "r", encoding="utf-8") as log_file:
+            logs = log_file.readlines()
         return HttpResponse("".join(logs), content_type="text/plain")
     except Exception as e:
         return JsonResponse({"error": "Failed to read logs"}, status=500)

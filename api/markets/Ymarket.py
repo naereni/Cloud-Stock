@@ -13,6 +13,7 @@ class Ymarket(Market):
                 "Authorization": f"Bearer {Ymarket_config.key}",
                 "Content-Type": "application/json",
             },
+            max_concurrent_requests=6
         )
         self.business_id = Ymarket_config.business_id
 
