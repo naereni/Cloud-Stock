@@ -11,13 +11,14 @@ class OrderPoller:
 
     async def poll_ozon_orders(self):
         ozon_orders_results = await ozon.pull_orders()
-        for posting in ozon_orders_results["result"]["postings"]:
-            if not self.cache.check(str(posting["order_id"])):
-                for item in posting["products"]:
+        for order in ozon_orders_results["result"]["postings"]:
+            if not self.cache.check(str(order["order_id"])):
+                logger.info(f"$$$ ORO {order}")
+                for item in order["products"]:
                     await asave_product(
                         service="ORO",
                         filters={
-                            "ozon_warehouse": posting["delivery_method"]["warehouse_id"],
+                            "ozon_warehouse": order["delivery_method"]["warehouse_id"],
                             "ozon_sku": item["sku"],
                         },
                         quantity=item["quantity"],
@@ -30,6 +31,7 @@ class OrderPoller:
         for i, wh in enumerate(ymarket_orders_results):
             for order in wh["orders"]:
                 if not self.cache.check(str(order["id"])):
+                    logger.info(f"$$$ ORY {order}")
                     for item in order["items"]:
                         await asave_product(
                             service="ORY",
@@ -43,6 +45,7 @@ class OrderPoller:
 
         for order in wb_orders_results["orders"]:
             if not self.cache.check(str(order["id"])) and order["wbStatus"] == "sold":
+                logger.info(f"$$$ ORW {order}")
                 for sku in order["skus"]:
                     await asave_product(
                         service="ORW",

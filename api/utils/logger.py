@@ -60,7 +60,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
 
 
 logger = logging.getLogger("api_logger")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(asctime)s] - %(levelname)s - %(message)s", datefmt="%d.%m.%y %H:%M:%S")
 

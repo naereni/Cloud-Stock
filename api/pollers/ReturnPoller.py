@@ -19,6 +19,7 @@ class ReturnPoller:
                     continue
 
                 if not self.cache.check(order["order_id"]):
+                    logger.info(f"$$$ REO {order}")
                     await asave_product(
                         service="RTO",
                         filters={"ozon_warehouse": order["place"]["id"], "ozon_sku": order["product"]["sku"]},
@@ -34,6 +35,7 @@ class ReturnPoller:
             for i, city_orders in enumerate(ymarket_returned_orders):
                 for order in city_orders.get("orders", []):
                     if not self.cache.check(order["id"]):
+                        logger.info(f"$$$ REY {order}")
                         for item in order.get("items", []):
                             await asave_product(
                                 service="REY",
@@ -50,6 +52,7 @@ class ReturnPoller:
 
             for order in wb_orders_results.get("orders", []):
                 if self.cache.check(order["id"]) and order["wbStatus"] == "canceled":
+                    logger.info(f"$$$ REW {order}")
                     for sku in order["skus"]:
                         await asave_product(
                             service="REW",

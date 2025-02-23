@@ -84,7 +84,14 @@ elif [[ "$mode" == "deploy" ]]; then
     source /home/dev/Cloud-Stock/venv/bin/activate
     pip install -r requirements.txt
     create_logs
-    rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    
+    SAVE_DB=$(python -c "import sys; sys.path.insert(0, 'config'); import django_config; print(getattr(django_config, 'SAVE_DB', 'False'))")
+    if [[ "$SAVE_DB" != "True" ]]; then
+        rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+        echo "DB was deleted"
+    else
+        echo "DB was not deleted"
+    fi
     python manage.py close_connections
     python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock

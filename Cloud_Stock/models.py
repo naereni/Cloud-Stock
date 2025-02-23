@@ -30,7 +30,6 @@ class Product(models.Model):
     avito_reserved = models.IntegerField(default=0)
 
     last_user = models.CharField(max_length=100, default="On build")
-    last_time = models.CharField(max_length=20)
     is_sync = models.BooleanField(default=False)
     is_modified = models.BooleanField(default=False)
     is_complement = models.BooleanField(default=False)
@@ -50,31 +49,22 @@ class Product(models.Model):
 
     def save(self, history=True, is_mod=True, *args, **kwargs):
         if self.is_complement:
-            try:
-                complement_obj = Product.objects.get(name=self.name.split(" / ")[0], city=self.city)
-                complement_obj.stock += self.stock - self.prev_stock
-                complement_obj.is_modified = is_mod
-                complement_obj.last_user = "COMP"
-                complement_obj.save()
-            except ObjectDoesNotExist:
-                pass
-
-            try:
-                complement_obj = Product.objects.get(name=self.name.split(" / ")[1], city=self.city)
-                complement_obj.stock += self.stock - self.prev_stock
-                complement_obj.is_modified = is_mod
-                complement_obj.last_user = "COMP"
-                complement_obj.save()
-            except ObjectDoesNotExist:
-                pass
+            for subsku in self.name.split(" / "):
+                try:
+                    complement_obj = Product.objects.get(name=subsku, city=self.city)
+                    complement_obj.stock += self.stock - self.prev_stock
+                    complement_obj.is_modified = is_mod
+                    complement_obj.last_user = "Comliment"
+                    complement_obj.save()
+                except ObjectDoesNotExist:
+                    pass
+    
+        if self.stock != self.prev_stock or self.is_modified:
+            self.is_modified = is_mod
 
         self.prev_stock = self.stock
-        self.last_time = dateformat.format(
-            timezone.now() + timedelta(hours=3),
-            "d.m.Y H:i:s",
-        )
-
+        
         if history:
             self.add_to_history(self.last_user, self.stock)
-
+    
         super().save(*args, **kwargs)
