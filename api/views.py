@@ -42,7 +42,7 @@ def get_logs(request):
         return JsonResponse({"error": "Log file not found"}, status=404)
 
     try:
-        with open(LOG_FILE_PATH, "r", encoding="utf-8") as log_file:
+        with open(LOG_FILE_PATH, "r", encoding="cp1251") as log_file:
             logs = log_file.readlines()
         return HttpResponse("".join(logs[::-1]), content_type="text/plain")
     except Exception as e:
