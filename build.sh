@@ -101,7 +101,7 @@ elif [[ "$mode" == "deploy" ]]; then
     python manage.py load_stocks
     sudo systemctl start redis
     python manage.py prefill_cache
-    sudo systemctl link /home/dev/Cloud-stock-health-bot/clhb.service
+    sudo systemctl link /home/dev/Cloud-total_stock-health-bot/clhb.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_worker.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/celery_beat.service
     sudo systemctl link /home/dev/Cloud-Stock/systemd_services/gunicorn.service

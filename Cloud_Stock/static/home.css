@@ -269,7 +269,7 @@ button[type="submit"]:focus {
 }
 
 /* Стиль для ячеек с остатками */
-.stock-cell {
+.total_stock-cell {
     background-color: #f0f0f0; /* Серый фон */
 }
 

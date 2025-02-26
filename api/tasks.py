@@ -2,35 +2,35 @@ import asyncio
 
 from celery import shared_task
 
-from api.pollers import order_poller, reserve_poller, return_poller
+from api.markets import ozon, wb, ymarket
 from api.utils.push_stocks import push_stocks
 
 
 @shared_task
-def polling_orders():
+def process_ozon():
     loop = asyncio.get_event_loop()
     if loop.is_running():
-        asyncio.create_task(order_poller.poll())
+        asyncio.create_task(ozon.poll())
     else:
-        loop.run_until_complete(order_poller.poll())
+        loop.run_until_complete(ozon.poll())
 
 
 @shared_task
-def polling_reserved():
+def process_ymarket():
     loop = asyncio.get_event_loop()
     if loop.is_running():
-        asyncio.create_task(reserve_poller.poll())
+        asyncio.create_task(ymarket.poll())
     else:
-        loop.run_until_complete(reserve_poller.poll())
+        loop.run_until_complete(ymarket.poll())
 
 
 @shared_task
-def polling_returned():
+def process_wb():
     loop = asyncio.get_event_loop()
     if loop.is_running():
-        asyncio.create_task(return_poller.poll())
+        asyncio.create_task(wb.poll())
     else:
-        loop.run_until_complete(return_poller.poll())
+        loop.run_until_complete(wb.poll())
 
 
 @shared_task

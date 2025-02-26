@@ -13,20 +13,20 @@ async def push_stocks():
 
     tasks = []
     for product in modified_products:
-        if product.stock == 3:
+        if product.total_stock == 3:
             stock_ozon = 2
             stock_ymarket = 1
             stock_wb = 0
-        elif product.stock == 2:
+        elif product.total_stock == 2:
             stock_ozon = 1
             stock_ymarket = 1
             stock_wb = 0
-        elif product.stock == 1:
+        elif product.total_stock == 1:
             stock_ozon = 0
             stock_ymarket = 1
             stock_wb = 0
         else:
-            stock_ozon = stock_ymarket = stock_wb = product.stock
+            stock_ozon = stock_ymarket = stock_wb = product.total_stock
 
         # TODO проверить в сервисах
         # if product.ozon_sku and product.ozon_warehouse:
@@ -36,10 +36,10 @@ async def push_stocks():
         # if product.wb_sku and product.wb_warehouse:
         #     tasks.append(wb.update_stock(product.wb_sku, product.wb_warehouse, stock_wb))
 
-        logger.info(f"Push OYW: {product.name}: {stock_ozon} | {stock_ymarket} | {stock_wb} \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}")
-        await tglog(
-            f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev stock: {product.prev_stock}\nnew stock: {product.stock}\nOYW: {stock_ozon}|{stock_ymarket}|{stock_wb}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
-        )
+        logger.info(f"Push OYW - {stock_ozon} | {stock_ymarket} | {stock_wb} - {product.name}:")
+        # await tglog(
+        #     f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev total_stock: {product.prev_total_stock}\nnew total_stock: {product.total_stock}\nOYW: {stock_ozon}|{stock_ymarket}|{stock_wb}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
+        # )
         product.is_modified = False
         await sync_to_async(product.save)()
     # await asyncio.gather(*tasks)

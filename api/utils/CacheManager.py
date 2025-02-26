@@ -58,7 +58,7 @@ class CacheManager:
                 self.redis_client.srem(self.cache_key, *cached_items)
         self.current_cycle_orders = set()
 
-    def check(self, order_id):
+    def check(self, order_id: str):
         if self.redis_client.sismember(self.cache_key, order_id):
             self.redis_client.sadd(self.cache_key, order_id)
             self.current_cycle_orders.add(order_id)
@@ -71,7 +71,7 @@ class CacheManager:
     def get_cache(self):
         return self.redis_client.smembers(self.cache_key)
 
-    def end_cycle(self):
+    def clean(self):
         """
         This function is called after the polling cycle completes.
         It removes cache entries that were present in the cache but did not appear in the current cycle.

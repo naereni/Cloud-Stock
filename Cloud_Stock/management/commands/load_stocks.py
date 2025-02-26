@@ -28,11 +28,15 @@ class Command(BaseCommand):
             try:
                 product = Product.objects.get(ozon_sku=item["sku"], ozon_warehouse=item["warehouse_id"])
 
-                product.stock = item["present"]
+                product.total_stock = item["present"]
                 product.prev_ozon_stock = item["present"]
                 product.ozon_reserved = item["reserved"]
-                product.save(is_mod=False)
+                product.save()
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Error while load stocks for [{item["sku"]}, {item["warehouse_id"]}, {item["present"]}, {item["reserved"]}]: {e}"))
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"Error while load stocks for [{item["sku"]}, {item["warehouse_id"]}, {item["present"]}, {item["reserved"]}]: {e}"
+                    )
+                )
 
         self.stdout.write(self.style.SUCCESS("Successfully load all products stocks"))

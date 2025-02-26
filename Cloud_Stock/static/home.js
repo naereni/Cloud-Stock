@@ -72,12 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Редактирование остатка и авито
-    const stockCells = document.querySelectorAll('.stock-cell');
+    const stockCells = document.querySelectorAll('.total_stock-cell');
     const avitoCells = document.querySelectorAll('.avito-cell');
 
     stockCells.forEach(cell => {
-        const stockValue = cell.querySelector('.stock-value');
-        const stockInput = cell.querySelector('.stock-input');
+        const stockValue = cell.querySelector('.total_stock-value');
+        const stockInput = cell.querySelector('.total_stock-input');
 
         cell.addEventListener('click', function() {
             stockValue.style.display = 'none';

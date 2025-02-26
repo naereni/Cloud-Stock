@@ -1,4 +1,9 @@
+import asyncio
+
+from celery import shared_task
+
 from api.markets.MetaMarket import Market
+from api.utils import CacheManager, asave_product, logger, tglog
 from api.utils.logger import logger
 from config.api_config import WB_config
 from config.django_config import DJANGO_DEBUG
@@ -7,6 +12,7 @@ from config.django_config import DJANGO_DEBUG
 class WB(Market):
     def __init__(self) -> None:
         super().__init__(
+            market="WB",
             base_url=(
                 "https://marketplace-api.wildberries.ru/api/"
                 if not DJANGO_DEBUG
@@ -17,6 +23,19 @@ class WB(Market):
                 "Content-Type": "application/json",
             },
         )
+        self.status_map = {
+            "new": ("WbNew", (1, 1)),
+            "receive": ("WbComplited", (0, -1)),
+            "cancel": ("WbCancelled", (-1, -1)),
+            "10": ("WbReject", (-1, -1)),
+        }
+
+    async def poll(self):
+        await asyncio.gather(
+            self.process_orders(),
+            # self.process_returned(),
+        )
+        self.cache.clean()
 
     async def pull_orders_status(self, orders_data: dict):
         endpoint = "v3/orders/status"
@@ -32,18 +51,47 @@ class WB(Market):
                 order_id = order["id"]
                 if order_id in status_map:
                     order["supplierStatus"] = status_map[order_id].get("supplierStatus", "")
-                    order["wbStatus"] = status_map[order_id].get("wbStatus", "")
             return orders_data
-        
+
         except Exception as e:
             logger.warning(f"Packet loss, endpoint={endpoint}, Exception={e}")
             return orders_data
 
-
-    async def pull_orders(self):
+    async def process_orders(self, first_time=False):
         endpoint = "v3/orders/new"
 
-        return await self._aget(endpoint)
+        orders_data = await self._aget(endpoint)
+        orders_data = await self.pull_orders_status(orders_data)
+
+        for order in orders_data["orders"]:
+            status, operation = self.status_map.get(order["supplierStatus"], (False, (0, 0)))
+            if status and not self.cache.check(str(order["id"]) + status) and not first_time:
+                logger.info(f"{status} {order}")
+                for sku in order["skus"]:
+                    qty, res = operation()
+                    await asave_product(
+                        service=status,
+                        filters={"wb_warehouse": order["warehouseId"], "wb_sku": sku},
+                        quantity=qty,
+                        wb_reserved=res,
+                    )
+
+    async def process_returned(self):
+        endpoint = "v1/claims"
+        request_data = {"is_archive": False}
+        response = await self._aget(endpoint, request_data)
+        for order in response.get("claims", []):
+            status = str(order.get("status_ex", None))
+            if status == "10" and not self.cache.check(str(order["id"]) + status):
+                logger.info(f"WbReturned {order}")
+                for sku in order["skus"]:
+                    qty, res = operation()
+                    await asave_product(
+                        service="WbReturned",
+                        filters={"wb_warehouse": order["warehouseId"], "wb_sku": sku},
+                        quantity=qty,
+                        wb_reserved=res,
+                    )
 
     async def pull_stocks(self, warehouse_id, skus: list):
         endpoint = f"v3/stocks/{warehouse_id}"

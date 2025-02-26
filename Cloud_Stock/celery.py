@@ -17,16 +17,16 @@ app.conf.worker_task_log_format = "[%(asctime)s] - %(levelname)s - %(task_name)s
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    "poll-orders": {
-        "task": "api.tasks.polling_orders",
+    "ozon": {
+        "task": "api.tasks.process_ozon",
         "schedule": timedelta(seconds=10),
     },
-    "poll-reserved": {
-        "task": "api.tasks.polling_reserved",
+    "ymarket": {
+        "task": "api.tasks.process_ymarket",
         "schedule": timedelta(seconds=10),
     },
-    "poll-returned": {
-        "task": "api.tasks.polling_returned",
+    "wb": {
+        "task": "api.tasks.process_wb",
         "schedule": timedelta(seconds=10),
     },
     "push-stocks": {

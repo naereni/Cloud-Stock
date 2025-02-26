@@ -5,14 +5,25 @@ from urllib.parse import urljoin
 import requests
 from aiohttp import ClientResponseError, ClientSession
 
-from api.utils.logger import logger
+from api.utils import CacheManager, logger
+
 
 class Market:
-    def __init__(self, base_url="http://127.0.0.1:8080", headers={}, max_concurrent_requests=1000):
+    def __init__(self, market, base_url="http://127.0.0.1:8080", headers={}, max_concurrent_requests=1000):
         self.base_url = base_url
         self.headers = headers
         self._session = None
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
+        self.cache = CacheManager(market)
+
+    async def polling_cycle(self):
+        await asyncio.gather(
+            self.new_orders(),
+            self.complited_orders(),
+            self.cancelled_orders(),
+            self.returned_orders(),
+        )
+        self.cache.clean()
 
     async def get_session(self):
         if self._session is None:

@@ -21,8 +21,9 @@ class Product(models.Model):
     ozon_warehouse = models.IntegerField(null=True)
     wb_warehouse = models.IntegerField(null=True)
 
-    stock = models.IntegerField(default=0)
-    prev_stock = models.IntegerField(default=0)
+    total_stock = models.IntegerField(default=0)
+    prev_total_stock = models.IntegerField(default=0)
+    available_stock = models.IntegerField(default=0)
 
     ozon_reserved = models.IntegerField(default=0)
     y_reserved = models.IntegerField(default=0)
@@ -47,24 +48,28 @@ class Product(models.Model):
         }
         self.history.append(history_entry)
 
-    def save(self, history=True, is_mod=True, *args, **kwargs):
+    def save(self, history=True, *args, **kwargs):
         if self.is_complement:
             for subsku in self.name.split(" / "):
                 try:
                     complement_obj = Product.objects.get(name=subsku, city=self.city)
-                    complement_obj.stock += self.stock - self.prev_stock
-                    complement_obj.is_modified = is_mod
+                    if complement_obj.prev_total_stock != complement_obj.total_stock:
+                        complement_obj.prev_total_stock = complement_obj.total_stock
+                        complement_obj.is_modified = True
                     complement_obj.last_user = "Comliment"
                     complement_obj.save()
                 except ObjectDoesNotExist:
                     pass
-    
-        if self.stock != self.prev_stock or self.is_modified:
-            self.is_modified = is_mod
 
-        self.prev_stock = self.stock
-        
+        if self.prev_total_stock != self.total_stock:
+            self.prev_total_stock = self.total_stock
+            self.is_modified = True
+
+        self.available_stock = (
+            self.total_stock - self.ozon_reserved - self.y_reserved - self.wb_reserved - self.avito_reserved
+        )
+
         if history:
-            self.add_to_history(self.last_user, self.stock)
-    
+            self.add_to_history(self.last_user, self.total_stock)
+
         super().save(*args, **kwargs)

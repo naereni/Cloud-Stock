@@ -13,7 +13,7 @@ LOG_FILE_PATH = os.path.join(BASE_DIR, LOG_FILE)
 
 def markets_stock_update(row_to_update: dict):
     product = Product.objects.get(name=row_to_update["name"], city=row_to_update["city"])
-    product.stock = row_to_update["stock"]
+    product.total_stock = row_to_update["total_stock"]
     product.save()
 
 
@@ -24,7 +24,7 @@ def pull_ozon_stocks(request):
     for item in ozon_stocks:
         try:
             product = Product.objects.get(ozon_sku=item["sku"], ozon_warehouse=item["warehouse_id"])
-            product.stock = item["present"]
+            product.total_stock = item["present"]
             product.ozon_reserved = item["reserved"]
             product.save()
         except:

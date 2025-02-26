@@ -12,7 +12,7 @@ class ProductForm(forms.ModelForm):
             "ozon_sku",
             "wb_sku",
             "city",
-            "stock",
+            "total_stock",
             "y_reserved",
             "ozon_reserved",
             "wb_reserved",
@@ -25,7 +25,7 @@ class ProductForm(forms.ModelForm):
             "ozon_sku": forms.TextInput(attrs={"class": "form-control", "placeholder": "Озон SKU"}),
             "wb_sku": forms.TextInput(attrs={"class": "form-control", "placeholder": "ВБ SKU"}),
             "city": forms.Select(attrs={"class": "form-control"}),
-            "stock": forms.NumberInput(
+            "total_stock": forms.NumberInput(
                 attrs={"class": "form-control", "placeholder": "Количество на складе"}
             ),
             "is_sync": forms.CheckboxInput(attrs={"class": "form-check"}),
@@ -56,7 +56,7 @@ class StockUpdateForm(forms.Form):
             for product in products:
                 self.fields[f"stock_{product.id}"] = forms.IntegerField(
                     label=f"Остаток на {product.city}",
-                    initial=product.stock,
+                    initial=product.total_stock,
                     required=False,
                     widget=forms.NumberInput(attrs={"class": "form-control"}),
                 )

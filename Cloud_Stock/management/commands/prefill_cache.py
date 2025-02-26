@@ -1,6 +1,7 @@
 import asyncio
 from typing import Any
 
+from asgiref.sync import sync_to_async
 from django.core.management.base import BaseCommand
 
 from api.markets import ozon, wb, ymarket
@@ -10,18 +11,21 @@ from config.wh import y_whs
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        order_cache = CacheManager("Orders cache")
-        return_cache = CacheManager("Return cache")
+        try:
 
-        async def fetch_delivered_orders():
-            tasks = []
-            for campaign_id in y_whs:
-                tasks.append(ymarket.pull_orders(campaign_id))
-            return await asyncio.gather(*tasks)
+            async def prefill_cache():
+                return await asyncio.gather(
+                    ozon.process_orders(first_time=True),
+                    sync_to_async(ozon.cache.clean)(),
+                    ymarket.process_orders(first_time=True),
+                    sync_to_async(ymarket.cache.clean)(),
+                    wb.process_orders(first_time=True),
+                    sync_to_async(wb.cache.clean)(),
+                )
 
-        delivered_orders_results = asyncio.run(fetch_delivered_orders())
-        for delivered_orders in delivered_orders_results:
-            for order in delivered_orders.get("orders", []):
-                _ = order_cache.check(str(order["id"]))
+            _ = asyncio.run(prefill_cache())
 
-        self.stdout.write(self.style.SUCCESS("Successfully fill ymarket cache"))
+            self.stdout.write(self.style.SUCCESS("Successfully fill ymarket cache"))
+
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(e))

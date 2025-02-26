@@ -52,7 +52,7 @@ def home(request):
         for product in products:
             if product.name not in product_stock:
                 product_stock[product.name] = {}
-            product_stock[product.name][product.city] = product.stock
+            product_stock[product.name][product.city] = product.total_stock
             product_stock[product.name]["pk"] = product.pk  # Добавляем pk продукта
     else:
         # Отображение таблицы для конкретного города
@@ -61,7 +61,7 @@ def home(request):
             {
                 "pk": product.pk,
                 "name": product.name,
-                "stock": product.stock
+                "total_stock": product.total_stock
                 - (product.ozon_reserved + product.y_reserved + product.wb_reserved + product.avito_reserved),
                 "y_reserved": product.y_reserved,
                 "ozon_reserved": product.ozon_reserved,
@@ -154,7 +154,7 @@ def user_stock_update(request):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    product.stock = int(value)
+                    product.total_stock = int(value)
                     markets_stock_update(product.__dict__)
                 except Product.DoesNotExist:
                     print(f"Product with id {product_id} does not exist")

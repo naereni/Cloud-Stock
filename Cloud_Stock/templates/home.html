@@ -100,9 +100,9 @@
                         <td>
                             <a href="{% url 'update' pk=product.pk %}?city={{ selected_city }}">{{ product.name }}</a>
                         </td>
-                        <td class="stock-cell">
-                            <span class="stock-value">{{ product.stock }}</span>
-                            <input type="number" min="0" name="stocks_{{ product.pk }}" value="{{ product.stock }}" class="stock-input" style="display: none;">
+                        <td class="total_stock-cell">
+                            <span class="total_stock-value">{{ product.total_stock }}</span>
+                            <input type="number" min="0" name="stocks_{{ product.pk }}" value="{{ product.total_stock }}" class="total_stock-input" style="display: none;">
                         </td>   
                         <td class="avito-cell">
                             <span class="avito-value">{{ product.avito_reserved }}</span>
@@ -139,11 +139,11 @@
 
 {% comment %} <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const stockCells = document.querySelectorAll('.stock-cell');
+        const stockCells = document.querySelectorAll('.total_stock-cell');
     
         stockCells.forEach(cell => {
-            const stockValue = cell.querySelector('.stock-value');
-            const stockInput = cell.querySelector('.stock-input');
+            const stockValue = cell.querySelector('.total_stock-value');
+            const stockInput = cell.querySelector('.total_stock-input');
     
             // При клике на ячейку, скрываем значение и показываем input
             cell.addEventListener('click', function() {
