@@ -29,14 +29,15 @@
             {% endfor %}
         </select>
     </form>
-    <button id="toggle-push-stocks" class="task-control-btn">Отключить синхронизацию</button>
 </div>
 
 {% if product_stock %}
 <div class="table-container">
     <div class="add-search-container">
         <input type="text" id="search-input" placeholder="Поиск по названию...">
-
+        
+        <button id="toggle-push-stocks" class="task-control-btn">Отключить синхронизацию</button>
+        
         <!-- <div class="pull-ozon-container">
             <form method="get" action="{% url 'pull_ozon_stocks' %}">
                 {% csrf_token %}
