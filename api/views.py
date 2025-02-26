@@ -7,6 +7,9 @@ from api.markets import ozon, wb, ymarket
 from Cloud_Stock.models import Product
 from Cloud_Stock.settings import BASE_DIR
 from config.django_config import LOG_FILE
+from celery.app.control import Control
+from Cloud_Stock.celery import app
+from api.utils import logger
 
 LOG_FILE_PATH = os.path.join(BASE_DIR, LOG_FILE)
 
@@ -47,3 +50,29 @@ def get_logs(request):
         return HttpResponse("".join(logs[::-1]), content_type="text/plain")
     except Exception as e:
         return JsonResponse({"error": "Failed to read logs - {e}"}, status=500)
+
+
+def toggle_push_stocks(request):
+    if request.method == 'POST':
+        control = Control(app)
+        task_name = 'api.tasks.pushing_stocks'
+        
+        # Get current state of the task
+        inspect = app.control.inspect()
+        active_tasks = inspect.active() or {}
+        is_task_running = any(task.get('name') == task_name for tasks in active_tasks.values() for task in tasks)
+        
+        if is_task_running:
+            # Revoke the task
+            app.control.revoke(task_name, terminate=True)
+            is_enabled = False
+            logger.warning("Push stocks disabled")
+        else:
+            # Enable the task
+            app.control.enable_events()
+            is_enabled = True
+            logger.warning("Push stocks enabled")
+        
+        return JsonResponse({'is_enabled': is_enabled})
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

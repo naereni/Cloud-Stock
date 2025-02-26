@@ -131,7 +131,24 @@ tbody tr:hover {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+.task-control-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s ease;
+}
 
+.task-control-btn.disabled {
+    background-color: #f44336;
+}
+
+.task-control-btn:hover {
+    opacity: 0.9;
+}
 .add-search-container button:hover {
     background-color: #4cae4c;
 }

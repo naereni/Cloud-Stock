@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{% static 'home.css' %}">
     <script src="{% static 'home.js' %}" defer></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="{% static 'task_control.js' %}" defer></script>
 </head>
 <body>
 <header>
@@ -28,6 +29,7 @@
             {% endfor %}
         </select>
     </form>
+    <button id="toggle-push-stocks" class="task-control-btn">Отключить синхронизацию</button>
 </div>
 
 {% if product_stock %}
@@ -35,12 +37,12 @@
     <div class="add-search-container">
         <input type="text" id="search-input" placeholder="Поиск по названию...">
 
-        <div class="pull-ozon-container">
+        <!-- <div class="pull-ozon-container">
             <form method="get" action="{% url 'pull_ozon_stocks' %}">
                 {% csrf_token %}
                 <button type="submit">Вытянуть остатки с озона</button>
             </form>
-        </div>
+        </div> -->
 
         <a href="{% url 'logs' %}">
             <button>Логи</button>
