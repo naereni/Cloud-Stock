@@ -52,7 +52,7 @@ def get_logs(request):
         return JsonResponse({"error": "Failed to read logs - {e}"}, status=500)
 
 
-def toggle_push_stocks(request):
+def switch_push_stocks(request):
     if request.method == 'POST':
         control = Control(app)
         task_name = 'api.tasks.pushing_stocks'

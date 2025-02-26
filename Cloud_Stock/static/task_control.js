@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleButton.classList.add('enabled');
 
     toggleButton.addEventListener('click', function() {
-        fetch('/api/toggle-push-stocks/', {
+        fetch('/switch-push-stocks/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrf-token]').content,
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             isTaskEnabled = data.is_enabled;
-            toggleButton.textContent = isTaskEnabled ? 'Отключить Push-Stocks' : 'Включить Push-Stocks';
+            toggleButton.textContent = isTaskEnabled ? 'Отключить синхронизацию' : 'Включить синхронизацию';
             toggleButton.classList.toggle('enabled', isTaskEnabled);
             toggleButton.classList.toggle('disabled', !isTaskEnabled);
         })
