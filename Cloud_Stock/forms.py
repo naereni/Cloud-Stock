@@ -35,6 +35,12 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["city"].required = True
         self.fields["city"].empty_label = None
+        self.fields["y_sku"].required = True
+        self.fields["y_sku"].empty_label = None
+        self.fields["ozon_sku"].required = True
+        self.fields["ozon_sku"].empty_label = None
+        self.fields["wb_sku"].required = True
+        self.fields["wb_sku"].empty_label = None
 
 
 class LoginForm(forms.Form):
