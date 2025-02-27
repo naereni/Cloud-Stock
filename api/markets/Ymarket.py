@@ -47,13 +47,13 @@ class Ymarket(Market):
 
     async def process_orders(self, first_time=False):
         endpoint = "v2/campaigns/{0}/orders"
-        request_data = {"fromDate": (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")}
-        # tasks = [self._aget(endpoint.format(campaign_id, request_data)) for campaign_id in y_whs]
-        tasks = [self._aget(endpoint.format("25877039"), request_data)]
+        request_data = {"fromDate": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")}
+        tasks = [self._aget(endpoint.format(campaign_id, request_data)) for campaign_id in y_whs]
+        # tasks = [self._aget(endpoint.format("25877039"), request_data)]
         
         responces = await asyncio.gather(*tasks)
         for i, wh in enumerate(responces):
-            logger.info(f"\n\n$$$$$$$ YANDEX {wh}")
+            # logger.info(f"\n\n$$$$$$$ YANDEX {wh}")
             for order in wh["orders"]:
                 status, operation = self.status_map.get(order.get("status", None), (False, lambda x: 0))
                 if status == "YaCancelled":
@@ -71,13 +71,13 @@ class Ymarket(Market):
 
     async def process_returned(self, campaign_id):
         endpoint = "campaigns/{0}/returns"
-        request_data = {"fromDate": (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")}
+        request_data = {"fromDate": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")}
         tasks = [self._aget(endpoint.format(campaign_id, request_data)) for campaign_id in y_whs]
         
         responces = await asyncio.gather(*tasks)   
 
         for i, wh in enumerate(responces):
-            logger.info(f"$$$$$$$ YANDEX {order}")
+            # logger.info(f"$$$$$$$ YANDEX {order}")
             for order in wh["returns"]:
                 status, operation = self.status_map.get(order.get("shipmentStatus", None), (False, lambda x: 0))
                 if status and not self.cache.check(str(order["id"])):
