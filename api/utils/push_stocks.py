@@ -14,7 +14,7 @@ async def push_stocks():
     ozon_stocks = []
     ya_stocks = []
     wb_stocks = []
-    
+
     for product in modified_products:
         # if product.total_stock == 3:
         #     stock_ozon = 2
@@ -46,9 +46,9 @@ async def push_stocks():
         product.is_modified = False
         await sync_to_async(product.save)()
     
-    tasks = [
-        ozon.push_stocks(ozon_stocks)
-    ]
+    if ozon_stocks != []:
+        responce = await ozon.push_stocks(ozon_stocks)
     
-    responce = await asyncio.gather(*tasks)
+    
+    # responce = await asyncio.gather(*tasks)
     logger.info(f"PUSH OZON RESPONCE - {responce}")
