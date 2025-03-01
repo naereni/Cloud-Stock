@@ -33,7 +33,7 @@ async def push_stocks():
 
 
         if product.ozon_sku and product.ozon_warehouse:
-            ozon_stocks.append({"product_id": product.ozon_sku, "stock": product.available_stock})
+            ozon_stocks.append({"product_id": product.ozon_sku, "stock": product.available_stock, "warehouse_id": product.ozon_warehouse})
         # if product.y_sku and product.y_warehouse:
         #     tasks.append(ymarket.update_stock(product.y_sku, product.y_warehouse, stock_ymarket))
         # if product.wb_sku and product.wb_warehouse:
