@@ -62,7 +62,21 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
 logger = logging.getLogger("api_logger")
 logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter("[%(asctime)s] - %(levelname)s - %(message)s", datefmt="%d.%m.%y %H:%M:%S")
+from datetime import datetime, timedelta
+from time import timezone
+
+class UTC3Formatter(logging.Formatter):
+    def converter(self, timestamp):
+        dt = datetime.fromtimestamp(timestamp)
+        return dt + timedelta(hours=3)
+
+    def formatTime(self, record, datefmt=None):
+        dt = self.converter(record.created)
+        if datefmt:
+            return dt.strftime(datefmt)
+        return dt.strftime("%d.%m.%y %H:%M:%S")
+
+formatter = UTC3Formatter("[%(asctime)s] - %(levelname)s - %(message)s", datefmt="%d.%m.%y %H:%M:%S")
 
 log_file_path = BASE_DIR / LOG_FILE
 file_handler = logging.handlers.RotatingFileHandler(

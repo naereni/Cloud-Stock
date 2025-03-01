@@ -104,8 +104,8 @@
                             <a href="{% url 'update' pk=product.pk %}?city={{ selected_city }}">{{ product.name }}</a>
                         </td>
                         <td class="total_stock-cell">
-                            <span class="total_stock-value">{{ product.total_stock }}</span>
-                            <input type="number" min="0" name="stocks_{{ product.pk }}" value="{{ product.total_stock }}" class="total_stock-input" style="display: none;">
+                            <span class="total_stock-value">{{ product.available_stock }}</span>
+                            <input type="number" min="0" name="stocks_{{ product.pk }}" value="{{ product.available_stock }}" class="total_stock-input" style="display: none;">
                         </td>   
                         <td class="avito-cell">
                             <span class="avito-value">{{ product.avito_reserved }}</span>

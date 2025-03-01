@@ -29,7 +29,6 @@ class Command(BaseCommand):
                 product = Product.objects.get(ozon_sku=item["sku"], ozon_warehouse=item["warehouse_id"])
 
                 product.total_stock = item["present"]
-                product.prev_ozon_stock = item["present"]
                 product.ozon_reserved = item["reserved"]
                 product.save()
             except Exception as e:

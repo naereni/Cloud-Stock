@@ -22,6 +22,10 @@ class Ozon(Market):
             "awaiting_packaging": ("OzonNew", lambda qty: (qty, qty)),
             "delivered": ("OzonComplited", lambda qty: (0, -qty)),
             "cancelled": ("OzonCancelled", lambda qty: (-qty, -qty)),
+            "seller": ("OzonCancelled-seller", lambda qty: (-qty, -qty)),
+            "client": ("OzonCancelled-client", lambda qty: (-qty, -qty)),
+            "customer": ("OzonCancelled-customer", lambda qty: (-qty, -qty)),
+            "delivery": ("OzonCancelled-delivery", lambda qty: (-qty, -qty)),
         }
 
     async def poll(self):
@@ -35,7 +39,7 @@ class Ozon(Market):
         endpoint = "v3/posting/fbs/list"
 
         date_to = datetime.now()
-        date_from = (date_to - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        date_from = (date_to - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
         date_to = date_to.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         request_data = {
@@ -51,6 +55,8 @@ class Ozon(Market):
 
         for order in responce.get("result", []).get("postings", []):
             status, operation = self.status_map.get(order["status"], (False, lambda x: 0))
+            if order.get("cancellation", None) is not None:
+                status, operation = self.status_map.get(order.get("cancellation", None).get("cancellation_type", None), (False, lambda x: 0))
             # ID+status to avoid duplicate caches
             if status and not self.cache.check(str(order["order_id"]) + status) and not first_time:
                 logger.info(f"{status} {order}")
@@ -70,7 +76,7 @@ class Ozon(Market):
         endpoint = "v1/returns/list"
 
         date_to = datetime.now()
-        date_from = (date_to - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        date_from = (date_to - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
         date_to = date_to.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         request_data = {
@@ -100,6 +106,17 @@ class Ozon(Market):
                         },
                         quantity=-int(item["quantity"]),
                     )
+
+    async def push_stocks(self, stocks_data: list[dict]):
+        endpoint = "v2/products/stocks"
+        try:
+            _ = stocks_data[0].get("product_id")
+        except Exception as e:
+            logger.error(f"While pushing ozon stocks: {e}")
+        request_data = {"stocks": stocks_data}
+
+        responce = await self._post(endpoint, request_data)
+        
 
     def get_stocks(self, skus: list):
         endpoint = "v1/product/info/stocks-by-warehouse/fbs"

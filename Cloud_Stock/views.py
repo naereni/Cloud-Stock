@@ -61,8 +61,7 @@ def home(request):
             {
                 "pk": product.pk,
                 "name": product.name,
-                "total_stock": product.total_stock
-                - (product.ozon_reserved + product.y_reserved + product.wb_reserved + product.avito_reserved),
+                "available_stock": product.available_stock,
                 "y_reserved": product.y_reserved,
                 "ozon_reserved": product.ozon_reserved,
                 "wb_reserved": product.wb_reserved,
