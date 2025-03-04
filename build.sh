@@ -87,7 +87,7 @@ elif [[ "$mode" == "deploy" ]]; then
     
     SAVE_DB=$(python -c "import sys; sys.path.insert(0, 'config'); import django_config; print(getattr(django_config, 'SAVE_DB', 'False'))")
     if [[ "$SAVE_DB" != "True" ]]; then
-        rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+        sudo rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
         echo "DB was deleted"
     else
         echo "DB was not deleted"
