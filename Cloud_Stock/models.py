@@ -53,10 +53,6 @@ class Product(models.Model):
     def save(self, from_child=False, *args, **kwargs):
         stock_diff = self.total_stock - self.prev_total_stock
 
-        # if self.available_stock + self.ozon_reserved + self.y_reserved + self.wb_reserved != self.total_stock:
-        #     logger.info(f"{self.last_user} - [{self.city}, {self.name.strip()}] - Avito reserve={self.avito_reserved}")
-        #     self.add_to_history(self.last_user+"-Avito", self.avito_reserved)
-
         self.available_stock = (
             self.total_stock - self.ozon_reserved - self.y_reserved - self.wb_reserved - self.avito_reserved
         )
