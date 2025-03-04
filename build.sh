@@ -85,13 +85,8 @@ elif [[ "$mode" == "deploy" ]]; then
     pip install -r requirements.txt
     create_logs
     
-    SAVE_DB=$(python -c "import sys; sys.path.insert(0, 'config'); import django_config; print(getattr(django_config, 'SAVE_DB', 'False'))")
-    if [[ "$SAVE_DB" != "True" ]]; then
-        sudo rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
-        echo "DB was deleted"
-    else
-        echo "DB was not deleted"
-    fi
+    sudo rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+    
     python manage.py close_connections
     python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock
