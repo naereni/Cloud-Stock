@@ -31,14 +31,14 @@ async def push_stocks():
         else:
             ozon_stock = y_stock = wb_stock = product.available_stock
 
-        # if product.ozon_sku and product.ozon_warehouse:
-        #     ozon_stocks.append({"product_id": product.ozon_product_id, "stock": ozon_stock, "warehouse_id": product.ozon_warehouse})
-        # if product.y_sku and product.y_warehouse:
-        #     y_stocks.setdefault(str(product.y_warehouse), [])
-        #     y_stocks[str(product.y_warehouse)].append({"sku": product.y_sku, "items": [{"count": y_stock}]})
-        # if product.wb_sku and product.wb_warehouse:
-        #     wb_stocks.setdefault(str(product.wb_warehouse), [])
-        #     wb_stocks[str(product.wb_warehouse)].append({"sku": str(product.wb_sku), "amount": wb_stock})
+        if product.ozon_sku and product.ozon_warehouse:
+            ozon_stocks.append({"product_id": product.ozon_product_id, "stock": ozon_stock, "warehouse_id": product.ozon_warehouse})
+        if product.y_sku and product.y_warehouse:
+            y_stocks.setdefault(str(product.y_warehouse), [])
+            y_stocks[str(product.y_warehouse)].append({"sku": product.y_sku, "items": [{"count": y_stock}]})
+        if product.wb_sku and product.wb_warehouse:
+            wb_stocks.setdefault(str(product.wb_warehouse), [])
+            wb_stocks[str(product.wb_warehouse)].append({"sku": str(product.wb_sku), "amount": wb_stock})
 
         logger.info(f"Push OYW - {ozon_stock} | {y_stock} | {wb_stock} - [{product.city} / {product.y_sku}]")
         product.is_modified = False
