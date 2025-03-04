@@ -85,8 +85,8 @@ elif [[ "$mode" == "deploy" ]]; then
     pip install -r requirements.txt
     create_logs
     
-    sudo rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
-    
+    rm -rf Cloud_Stock/migrations/ && rm db/db.sqlite3
+
     python manage.py close_connections
     python manage.py collectstatic --noinput
     python manage.py makemigrations Cloud_Stock
