@@ -35,6 +35,21 @@ class Market:
             await self._session.__aexit__(None, None, None)
             self._session = None
 
+    async def _aput(self, endpoint, request_data=None):
+        print(request_data)
+        session = await self.get_session()
+        url = urljoin(self.base_url, endpoint)
+        async with self.semaphore:
+            try:
+                async with session.put(url, headers=self.headers, json=request_data) as response:
+                    if response.status == 200 and response.status == 204:
+                        return await response.json()
+                    else:
+                        error_text = await response.text()
+                        logger.error(f"_aput to {url}: {response.status} - {error_text}")
+            except ClientResponseError as e:
+                logger.exception(f"ClientResponseError while _aput {url}: {e.status} - {e.message}")
+
     async def _apost(self, endpoint, request_data=None):
         session = await self.get_session()
         url = urljoin(self.base_url, endpoint)

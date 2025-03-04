@@ -65,6 +65,7 @@ logger.setLevel(logging.INFO)
 from datetime import datetime, timedelta
 from time import timezone
 
+
 class UTC3Formatter(logging.Formatter):
     def converter(self, timestamp):
         dt = datetime.fromtimestamp(timestamp)
@@ -75,6 +76,7 @@ class UTC3Formatter(logging.Formatter):
         if datefmt:
             return dt.strftime(datefmt)
         return dt.strftime("%d.%m.%y %H:%M:%S")
+
 
 formatter = UTC3Formatter("[%(asctime)s] - %(levelname)s - %(message)s", datefmt="%d.%m.%y %H:%M:%S")
 

@@ -52,27 +52,39 @@ def get_logs(request):
         return JsonResponse({"error": "Failed to read logs - {e}"}, status=500)
 
 
-def switch_push_stocks(request):
-    if request.method == 'POST':
-        control = Control(app)
-        task_name = 'api.tasks.pushing_stocks'
-        
-        # Get current state of the task
-        inspect = app.control.inspect()
-        active_tasks = inspect.active() or {}
-        is_task_running = any(task.get('name') == task_name for tasks in active_tasks.values() for task in tasks)
-        
-        if is_task_running:
-            # Revoke the task
-            app.control.revoke(task_name, terminate=True)
-            is_enabled = False
-            logger.warning("Push stocks disabled")
-        else:
-            # Enable the task
-            app.control.enable_events()
-            is_enabled = True
-            logger.warning("Push stocks enabled")
-        
-        return JsonResponse({'is_enabled': is_enabled})
-    
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+def sync_kill_switch(request):
+    if request.method == "POST":
+        control = Control(app)  # Здесь предполагается, что Control - это объект для управления Celery
+        task_name = "api.tasks.pushing_stocks"
+
+        try:
+            turn_on = request.POST.get("turnOn")  # Получаем 'turnOn' с фронтенда
+            if turn_on is None:
+                return JsonResponse({"error": "Missing 'turnOn' parameter"}, status=400)
+
+            turn_on = turn_on.lower() == "true"  # Преобразуем строку в булево значение
+
+            if turn_on:
+                app.control.enable_events()
+                is_enabled = True
+                logger.warning("Push stocks enabled")
+            else:
+                inspect = app.control.inspect()
+                active_tasks = inspect.active() or {}
+                # Поиск активной задачи по имени
+                task_ids = [
+                    task.get("id")
+                    for tasks in active_tasks.values()
+                    for task in tasks
+                    if task.get("name") == task_name
+                ]
+                for task_id in task_ids:
+                    app.control.revoke(task_id, terminate=True)  # Завершаем задачу по ID
+                is_enabled = False
+                logger.warning("Push stocks disabled")
+
+            return JsonResponse({"is_enabled": is_enabled})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)

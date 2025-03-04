@@ -12,43 +12,47 @@ async def push_stocks():
     modified_products = await sync_to_async(list)(Product.objects.filter(is_sync=True, is_modified=True))
 
     ozon_stocks = []
-    ya_stocks = []
-    wb_stocks = []
+    y_stocks = {}
+    wb_stocks = {}
 
     for product in modified_products:
-        # if product.total_stock == 3:
-        #     stock_ozon = 2
-        #     stock_ymarket = 1
-        #     stock_wb = 0
-        # elif product.total_stock == 2:
-        #     stock_ozon = 1
-        #     stock_ymarket = 1
-        #     stock_wb = 0
-        # elif product.total_stock == 1:
-        #     stock_ozon = 0
-        #     stock_ymarket = 1
-        #     stock_wb = 0
-        # else:
-        #     stock_ozon = stock_ymarket = stock_wb = product.total_stock
+        if product.available_stock == 3:
+            ozon_stock = 2
+            y_stock = 1
+            wb_stock = 0
+        elif product.available_stock == 2:
+            ozon_stock = 1
+            y_stock = 1
+            wb_stock = 0
+        elif product.available_stock == 1:
+            ozon_stock = 0
+            y_stock = 1
+            wb_stock = 0
+        else:
+            ozon_stock = y_stock = wb_stock = product.available_stock
 
-
-        if product.ozon_sku and product.ozon_warehouse:
-            ozon_stocks.append({"product_id": product.ozon_sku, "stock": product.available_stock, "warehouse_id": product.ozon_warehouse})
+        # if product.ozon_sku and product.ozon_warehouse:
+        #     ozon_stocks.append({"product_id": product.ozon_product_id, "stock": ozon_stock, "warehouse_id": product.ozon_warehouse})
         # if product.y_sku and product.y_warehouse:
-        #     tasks.append(ymarket.update_stock(product.y_sku, product.y_warehouse, stock_ymarket))
+        #     y_stocks.setdefault(str(product.y_warehouse), [])
+        #     y_stocks[str(product.y_warehouse)].append({"sku": product.y_sku, "items": [{"count": y_stock}]})
         # if product.wb_sku and product.wb_warehouse:
-        #     tasks.append(wb.update_stock(product.wb_sku, product.wb_warehouse, stock_wb))
+        #     wb_stocks.setdefault(str(product.wb_warehouse), [])
+        #     wb_stocks[str(product.wb_warehouse)].append({"sku": str(product.wb_sku), "amount": wb_stock})
 
-        logger.info(f"Push OYW - | {stock_ozon} | {stock_ymarket} | {stock_wb} | - [{product.city} {product.y_sku}]")
-        # await tglog(
-        #     f"🔴🔴🔴ОТПРАВКА\n{product.name}\n{product.city}\nprev total_stock: {product.prev_total_stock}\nnew total_stock: {product.total_stock}\nOYW: {stock_ozon}|{stock_ymarket}|{stock_wb}\nHistory \n{"\n".join([" ".join([t["timestamp"],t["user"],str(t["new_stock"])]) for t in product.history])}"
-        # )
+        logger.info(f"Push OYW - {ozon_stock} | {y_stock} | {wb_stock} - [{product.city} / {product.y_sku}]")
         product.is_modified = False
         await sync_to_async(product.save)()
-    
+
+    tasks = []
     if ozon_stocks != []:
-        responce = await ozon.push_stocks(ozon_stocks)
-    
-    
-    # responce = await asyncio.gather(*tasks)
-    logger.info(f"PUSH OZON RESPONCE - {responce}")
+        tasks.append(ozon.push_stocks(ozon_stocks))
+    if y_stocks != {}:
+        tasks.append(ymarket.push_stocks(y_stocks))
+    if wb_stocks != {}:
+        tasks.append(wb.push_stocks(wb_stocks))
+
+    if tasks != []:
+        responces = await asyncio.gather(*tasks)
+        for response in responces:
+            logger.info("Responce from push -", response)

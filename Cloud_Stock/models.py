@@ -13,6 +13,7 @@ class Product(models.Model):
 
     y_sku = models.CharField(max_length=100, null=True)
     ozon_sku = models.CharField(max_length=100, null=True)
+    ozon_product_id = models.CharField(max_length=100, null=True)
     wb_sku = models.CharField(max_length=100, null=True)
 
     city = models.CharField(max_length=10, choices=cities)
@@ -33,6 +34,7 @@ class Product(models.Model):
     last_user = models.CharField(max_length=100, default="On build")
     is_sync = models.BooleanField(default=False)
     is_modified = models.BooleanField(default=False)
+    is_part_of_compliment = models.BooleanField(default=False)
     is_complement = models.BooleanField(default=False)
     history = models.JSONField(default=list)
 
@@ -48,28 +50,47 @@ class Product(models.Model):
         }
         self.history.append(history_entry)
 
-    def save(self, history=True, *args, **kwargs):
-        if self.is_complement:
-            for subsku in self.name.split(" / "):
-                try:
-                    complement_obj = Product.objects.get(name=subsku, city=self.city)
-                    if complement_obj.prev_total_stock != complement_obj.total_stock:
-                        complement_obj.prev_total_stock = complement_obj.total_stock
-                        complement_obj.is_modified = True
-                    complement_obj.last_user = "Comliment"
-                    complement_obj.save()
-                except ObjectDoesNotExist:
-                    pass
+    def save(self, from_child=False, *args, **kwargs):
+        stock_diff = self.total_stock - self.prev_total_stock
 
-        if self.prev_total_stock != self.total_stock:
-            self.prev_total_stock = self.total_stock
-            self.is_modified = True
+        # if self.available_stock + self.ozon_reserved + self.y_reserved + self.wb_reserved != self.total_stock:
+        #     logger.info(f"{self.last_user} - [{self.city}, {self.name.strip()}] - Avito reserve={self.avito_reserved}")
+        #     self.add_to_history(self.last_user+"-Avito", self.avito_reserved)
 
         self.available_stock = (
             self.total_stock - self.ozon_reserved - self.y_reserved - self.wb_reserved - self.avito_reserved
         )
 
-        if history:
-            self.add_to_history(self.last_user, self.total_stock)
+        if stock_diff != 0:
+            self.prev_total_stock = self.total_stock
+            logger.info(f"{self.last_user} - [{self.city}, {self.name.strip()}] - {stock_diff}")
+            self.add_to_history(self.last_user, self.available_stock)
+            self.is_modified = True
+
+        if self.is_complement and not from_child:
+            for subname in self.name.split(" / "):
+                try:
+                    child = Product.objects.get(name=subname, city=self.city)
+                    if stock_diff != 0:
+                        child.total_stock += stock_diff
+                        child.last_user = self.last_user + "-FromComliment(" + self.ozon_sku + ")"
+                        child.save()
+                except ObjectDoesNotExist:
+                    pass
+
+        try:
+            if self.is_part_of_compliment:
+                complements = Product.objects.filter(
+                    is_complement=True, name__contains=self.name, city=self.city
+                ).exclude(id=self.id)
+                for complement in complements:
+                    subname1, subname2 = complement.name.split(" / ")
+                    subname = subname1.strip() if self.name == subname2 else subname2.strip()
+                    second_part_stock = Product.objects.get(name=subname, city=self.city).available_stock
+                    complement.total_stock = min(self.available_stock, second_part_stock)
+                    complement.last_user = self.last_user + "-FromChild(" + self.ozon_sku + ")"
+                    complement.save(from_child=True)
+        except Exception as e:
+            logger.error(f"Save comp from child error: {e}")
 
         super().save(*args, **kwargs)

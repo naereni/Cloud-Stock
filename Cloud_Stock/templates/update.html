@@ -23,7 +23,7 @@
     <div class="info-container">
         <h2>История изменений</h2>
         <ul>
-            {% for record in history|slice:":5" %}
+            {% for record in history|dictsortreversed:"timestamp" %}
                 <li>
                     <p><strong>Время:</strong> {{ record.timestamp }}</p>
                     <p><strong>Пользователь:</strong> {{ record.user }}</p>

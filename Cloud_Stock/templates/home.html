@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{% static 'home.css' %}">
     <script src="{% static 'home.js' %}" defer></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <script src="{% static 'task_control.js' %}" defer></script>
 </head>
 <body>
 <header>
@@ -36,14 +35,8 @@
     <div class="add-search-container">
         <input type="text" id="search-input" placeholder="Поиск по названию...">
         
-        <button id="toggle-push-stocks" class="task-control-btn">Отключить синхронизацию</button>
-        
-        <!-- <div class="pull-ozon-container">
-            <form method="get" action="{% url 'pull_ozon_stocks' %}">
-                {% csrf_token %}
-                <button type="submit">Вытянуть остатки с озона</button>
-            </form>
-        </div> -->
+        <!-- TODO -->
+        <!-- <button id="toggle-push-stocks" class="task-control-btn">Kill Switch</button> -->
 
         <a href="{% url 'logs' %}">
             <button>Логи</button>
@@ -126,20 +119,6 @@
 <p>Нет данных для отображения.</p>
 {% endif %}
 
-<div id="confirmation-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Подтвердить изменения?</h2>
-        <div id="modal-changes" class="modal-changes"></div>
-        <div class="modal-buttons">
-            <button id="confirm-save">Да</button>
-            <button id="cancel-save">Нет</button>
-        </div>
-    </div>
-</div>
-</body>
-</html>
-
 {% comment %} <script>
     document.addEventListener('DOMContentLoaded', function() {
         const stockCells = document.querySelectorAll('.total_stock-cell');
@@ -177,5 +156,31 @@
             valueElement.style.display = 'inline'; // Показываем значение
             inputElement.style.display = 'none'; // Скрываем input
         }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = document.getElementById('toggle-push-stocks');
+        
+        toggleButton.addEventListener('click', function() {
+            const isEnabled = toggleButton.textContent === 'Kill Switch';
+
+            fetch('/sync-kill-switch', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // Исправлено для получения CSRF-токена
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'turnOn': !isEnabled}) // исправлено
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_enabled) { // изменен ключ на 'is_enabled'
+                    toggleButton.textContent = 'Kill Switch';
+                } else {
+                    toggleButton.textContent = 'Включить синхронизацию';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
     });
     </script> {% endcomment %}

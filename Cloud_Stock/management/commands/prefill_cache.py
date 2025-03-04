@@ -18,6 +18,7 @@ class Command(BaseCommand):
                     ozon.process_orders(first_time=True),
                     sync_to_async(ozon.cache.clean)(),
                     ymarket.process_orders(first_time=True),
+                    ymarket.process_delivering(),
                     sync_to_async(ymarket.cache.clean)(),
                     wb.process_orders(first_time=True),
                     sync_to_async(wb.cache.clean)(),
@@ -25,7 +26,7 @@ class Command(BaseCommand):
 
             _ = asyncio.run(prefill_cache())
 
-            self.stdout.write(self.style.SUCCESS("Successfully fill ymarket cache"))
+            self.stdout.write(self.style.SUCCESS("Successfully fill cache"))
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(e))

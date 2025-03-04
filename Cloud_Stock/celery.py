@@ -31,6 +31,6 @@ app.conf.beat_schedule = {
     },
     "push-stocks": {
         "task": "api.tasks.pushing_stocks",
-        "schedule": timedelta(seconds=30),
+        "schedule": timedelta(seconds=10),
     },
 }

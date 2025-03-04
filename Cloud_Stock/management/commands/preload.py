@@ -30,6 +30,7 @@ class Command(BaseCommand):
                         name=row["Название для заявки"],
                         y_sku=row["SKU Яндекс"],
                         ozon_sku=row["SKU Озон"],
+                        ozon_product_id=row["ozon_product_id"],
                         wb_sku=row["SKU WB"],
                         is_complement=(True if "/" in row["Название для заявки"] else False),
                         city=city,
@@ -40,5 +41,11 @@ class Command(BaseCommand):
                         total_stock=10 if DJANGO_DEBUG and not "/" in row["Название для заявки"] else 0,
                         is_modified=False,
                     )
+
+                    if "/" in row["Название для заявки"]:
+                        p1 = row["Название для заявки"].split("/")[0].strip()
+                        p2 = row["Название для заявки"].split("/")[1].strip()
+                        Product.objects.filter(name=p1).update(is_part_of_compliment=True)
+                        Product.objects.filter(name=p2).update(is_part_of_compliment=True)
 
         self.stdout.write(self.style.SUCCESS("Successfully imported products"))

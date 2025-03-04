@@ -35,11 +35,11 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["city"].required = True
         self.fields["city"].empty_label = None
-        self.fields["y_sku"].required = True
+        self.fields["y_sku"].required = False
         self.fields["y_sku"].empty_label = None
-        self.fields["ozon_sku"].required = True
+        self.fields["ozon_sku"].required = False
         self.fields["ozon_sku"].empty_label = None
-        self.fields["wb_sku"].required = True
+        self.fields["wb_sku"].required = False
         self.fields["wb_sku"].empty_label = None
 
 
@@ -63,6 +63,12 @@ class StockUpdateForm(forms.Form):
                 self.fields[f"stock_{product.id}"] = forms.IntegerField(
                     label=f"Остаток на {product.city}",
                     initial=product.total_stock,
+                    required=False,
+                    widget=forms.NumberInput(attrs={"class": "form-control"}),
+                )
+                self.fields[f"avito_{product.id}"] = forms.IntegerField(
+                    label=f"Avito резерв",
+                    initial=product.avito_reserved,
                     required=False,
                     widget=forms.NumberInput(attrs={"class": "form-control"}),
                 )

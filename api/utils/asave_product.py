@@ -44,7 +44,6 @@ async def asave_product(service: str, filters: dict, quantity, **kwargs):
                 product.y_reserved += y_reserved
                 product.wb_reserved += wb_reserved
 
-                logger.info(f"{service} - [{format_filters(filters)}] - {quantity}")
                 product.save()
 
         await sync_to_async(update_product)()

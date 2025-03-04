@@ -33,12 +33,11 @@ class WB(Market):
     async def poll(self):
         await asyncio.gather(
             self.process_orders(),
-            # self.process_returned(),
         )
         self.cache.clean()
 
     async def pull_orders_status(self, orders_data: dict):
-        endpoint = "v3/orders/status"
+        endpoint = "v3/dbs/orders/status"
         request_data = {"orders": [order["id"] for order in orders_data["orders"]]}
         if request_data["orders"] == []:
             return orders_data
@@ -58,12 +57,17 @@ class WB(Market):
             return orders_data
 
     async def process_orders(self, first_time=False):
-        endpoint = "v3/orders/new"
+        endpoint = "v3/dbs/orders/new"
 
         orders_data = await self._aget(endpoint)
         orders_data = await self.pull_orders_status(orders_data)
 
         for order in orders_data["orders"]:
+            if order["supplierStatus"] == "receive" and not self.cache.check(
+                str(order["supplierStatus"]) + "new"
+            ):
+                logger.info(f"Ozon unprocessed delivered order, skip - {order["supplierStatus"]}")
+                continue
             status, operation = self.status_map.get(order["supplierStatus"], (False, (0, 0)))
             if status and not self.cache.check(str(order["id"]) + status) and not first_time:
                 logger.info(f"{status} {order}")
@@ -76,22 +80,15 @@ class WB(Market):
                         wb_reserved=res,
                     )
 
-    async def process_returned(self):
-        endpoint = "v1/claims"
-        request_data = {"is_archive": False}
-        response = await self._aget(endpoint, request_data)
-        for order in response.get("claims", []):
-            status = str(order.get("status_ex", None))
-            if status == "10" and not self.cache.check(str(order["id"]) + status):
-                logger.info(f"WbReturned {order}")
-                for sku in order["skus"]:
-                    qty, res = operation()
-                    await asave_product(
-                        service="WbReturned",
-                        filters={"wb_warehouse": order["warehouseId"], "wb_sku": sku},
-                        quantity=qty,
-                        wb_reserved=res,
-                    )
+    async def push_stocks(self, stocks):
+        endpoint = "v3/stocks/{0}"
+        print(stocks)
+        tasks = [
+            self._aput(endpoint.format(warehouse_id), {"stocks": stocks[warehouse_id]})
+            for warehouse_id in stocks.keys()
+        ]
+        r = await asyncio.gather(*tasks)
+        logger.info(f"Response from WB push - {r}")
 
     async def pull_stocks(self, warehouse_id, skus: list):
         endpoint = f"v3/stocks/{warehouse_id}"
