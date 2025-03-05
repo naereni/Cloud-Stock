@@ -55,7 +55,7 @@ def home(request):
         product_stock = [
             {
                 "pk": product.pk,
-                "name": product.name,
+                "name": product.y_sku,
                 "available_stock": product.available_stock,
                 "avito_reserved": product.avito_reserved,
                 "y_reserved": product.y_reserved,
