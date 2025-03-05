@@ -146,7 +146,6 @@ def login_view(request):
 def user_stock_update(request):
     if request.method == "POST":
         for key, value in request.POST.items():
-            # Обработка основного запаса (stocks_)
             if key.startswith("stocks_"):
                 product_id = key.split("_")[-1]
                 try:
@@ -162,7 +161,7 @@ def user_stock_update(request):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    new_avito = int(value)
+                    product.avito_reserved = new_avito = int(value)
                     old_avito = product.avito_reserved
                     if new_avito != old_avito:
                         product.add_to_history("Avito", new_avito)
@@ -170,7 +169,6 @@ def user_stock_update(request):
                         if new_avito > old_avito:
                             diff = new_avito - old_avito
                             product.total_stock -= diff
-                        product.avito_reserved = new_avito
                         product.save()
                 except Product.DoesNotExist:
                     logger.error(f"Product with id {product_id} does not exist")
