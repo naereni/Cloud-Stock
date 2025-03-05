@@ -164,7 +164,7 @@ def user_stock_update(request):
                         product.add_to_history("Avito", int(value))
                         logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {int(value)}")
                         if product.avito_reserved < int(value):
-                            product.total_stock -= int(value) - product.avito_reserved
+                            product.total_stock -= int(value) - product.avito_reserved + 1
                         product.avito_reserved = int(value)
                         product.save()
                 except Product.DoesNotExist:
