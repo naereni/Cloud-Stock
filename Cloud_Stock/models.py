@@ -116,12 +116,9 @@ class Product(models.Model):
             for complement in complements:
                 subname1, subname2 = complement.name.split(" / ")
                 subname = subname1.strip() if self.name == subname2 else subname2.strip()
-                try:
-                    second_part_stock = Product.objects.get(name=subname, city=self.city).available_stock
-                except Exception as e:
-                    logger.error(f"Save comp from child '{subname}' error: {e}")
-                    second_part_stock = self.available_stock
-                complement.total_stock = min(self.available_stock, second_part_stock)
+                second_part = Product.objects.get(name=subname, city=self.city)
+                if second_part.id == self.id: continue
+                complement.total_stock = min(self.available_stock, second_part.available_stock)
                 complement.last_user = self.last_user + "-FromChild(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
                 complement.save(exclude_id=complement.id)
         
