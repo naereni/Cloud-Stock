@@ -23,7 +23,7 @@
     <div class="info-container">
         <h2>История изменений</h2>
         <ul>
-            {% for record in history|dictsortreversed:"timestamp" %}
+            {% for record in history reversed %}
                 <li>
                     <p><strong>Время:</strong> {{ record.timestamp }}</p>
                     <p><strong>Пользователь:</strong> {{ record.user }}</p>
@@ -36,8 +36,11 @@
     </div>
 </div>
 
-<script src="{% static 'update.js' %}"></script>
 <script>
+    function submitForm() {
+        document.getElementById('product-form').submit();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Применение стилей к полям формы
         const formGroups = document.querySelectorAll('#product-form p');
@@ -61,7 +64,7 @@
             'name': 'Наименование',
             'city': 'Город',
             'total_stock': 'Остаток',
-            'is_sync': 'Синхронизировать'
+            'is_sync': 'Синхронизация'
         };
         Object.keys(labels).forEach(name => {
             const label = document.querySelector(`label[for="id_${name}"]`);

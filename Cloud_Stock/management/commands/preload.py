@@ -26,20 +26,23 @@ class Command(BaseCommand):
 
             for row in csv_data:
                 for city in warehouses.keys():
+                    kwargs = {}
+                    if row["SKU Яндекс"] != "":
+                        kwargs["y_sku"] = row["SKU Яндекс"] 
+                    if row["SKU Озон"] != "":
+                        kwargs["ozon_sku"] = row["SKU Озон"] 
+                    if row["ozon_product_id"] != "":
+                        kwargs["ozon_product_id"] = row["ozon_product_id"] 
+                    if row["SKU WB"] != "":
+                        kwargs["wb_sku"] = row["SKU WB"] 
                     Product.objects.create(
-                        name=row["Название для заявки"],
-                        y_sku=row["SKU Яндекс"],
-                        ozon_sku=row["SKU Озон"],
-                        ozon_product_id=row["ozon_product_id"],
-                        wb_sku=row["SKU WB"],
+                        name=row["Название для заявки"].strip(),
                         is_complement=(True if "/" in row["Название для заявки"] else False),
                         city=city,
                         y_warehouse=warehouses[city]["ymarket"],
                         ozon_warehouse=warehouses[city]["ozon"],
                         wb_warehouse=warehouses[city]["wb"],
-                        is_sync=False,  # if row["Название для заявки"] == "Кровать Мила V32 160х200" else False,
-                        total_stock=10 if DJANGO_DEBUG and not "/" in row["Название для заявки"] else 0,
-                        is_modified=False,
+                        **kwargs
                     )
 
                     if "/" in row["Название для заявки"]:

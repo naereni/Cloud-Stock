@@ -17,7 +17,7 @@ class Command(BaseCommand):
                     [
                         str(sku)
                         for sku in Product.objects.all().values_list("ozon_sku", flat=True)
-                        if sku != ""
+                        if sku != None and sku != ""
                     ]
                 )
             )

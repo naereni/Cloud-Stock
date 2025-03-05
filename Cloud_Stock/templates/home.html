@@ -2,7 +2,7 @@
 {% load get_stock_for_city %}
 {% load custom_filters %}
 
-<link rel="stylesheet" href="{% static 'home.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'home.css' %}">
 
 
 <!DOCTYPE html>
@@ -49,6 +49,7 @@
     <form id="batch-edit-form" method="post" action="{% url 'user_stock_update' %}">
         {% csrf_token %}
         <input type="hidden" name="city" value="{{ selected_city }}">
+        <input type="hidden" name="username" value="{{ request.name }}">
         <table id="dynamic-table">
             <thead>
                 <tr>
@@ -102,7 +103,7 @@
                         </td>   
                         <td class="avito-cell">
                             <span class="avito-value">{{ product.avito_reserved }}</span>
-                            <input type="number" min="0" name="avito_{{ product.pk }}" value="{{ product.avito_reserved }}" class="avito-input" style="display: none;">
+                            <input type="number" min="0" max="{{ product.available_stock|add:product.avito_reserved }}" name="avito_{{ product.pk }}" value="{{ product.avito_reserved }}" class="avito-input" style="display: none;">
                         </td>
                         <td>{{ product.ozon_reserved }}</td>
                         <td>{{ product.y_reserved }}</td>
@@ -118,6 +119,20 @@
 {% else %}
 <p>Нет данных для отображения.</p>
 {% endif %}
+
+<div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Подтвердить изменения?</h2>
+        <div id="modal-changes" class="modal-changes"></div>
+        <div class="modal-buttons">
+            <button id="confirm-save">Да</button>
+            <button id="cancel-save">Нет</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
 
 {% comment %} <script>
     document.addEventListener('DOMContentLoaded', function() {

@@ -5,11 +5,11 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DeleteView, UpdateView
 
-from api.views import markets_stock_update
 from Cloud_Stock.decorators import login_required
 from Cloud_Stock.forms import LoginForm, ProductForm, SearchForm
 from Cloud_Stock.models import Product
 
+from api.utils import logger
 
 @login_required
 def handler404(request, *args, **kwargs):
@@ -21,18 +21,14 @@ def home(request):
     form = SearchForm()
     query = None
     selected_city = request.GET.get("city", "all")
-
-    # Получение списка продуктов
     products = Product.objects.all()
 
-    # Фильтрация по запросу
     if "query" in request.GET:
         form = SearchForm(request.GET)
         if form.is_valid():
             query = form.cleaned_data["query"]
             products = products.filter(name__icontains=query)
 
-    # Список всех городов
     city_list = [
         ("spb", "СПБ"),
         ("msk", "МСК"),
@@ -47,7 +43,6 @@ def home(request):
 
     # Подготовка данных для отображения остатков
     if selected_city == "all":
-        # Отображение таблицы для всех складов
         product_stock = {}
         for product in products:
             if product.name not in product_stock:
@@ -62,10 +57,10 @@ def home(request):
                 "pk": product.pk,
                 "name": product.name,
                 "available_stock": product.available_stock,
+                "avito_reserved": product.avito_reserved,
                 "y_reserved": product.y_reserved,
                 "ozon_reserved": product.ozon_reserved,
                 "wb_reserved": product.wb_reserved,
-                "avito_reserved": product.avito_reserved,
                 "city": dict(city_list).get(product.city),
             }
             for product in products
@@ -91,6 +86,7 @@ class InfoUpdateView(UpdateView):
     def form_valid(self, form):
         product = form.save(commit=False)
         product.last_user = self.request.user.username
+        product.total_stock += product.available_stock - product.total_stock + product.avito_reserved
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -148,23 +144,79 @@ def login_view(request):
 @login_required
 def user_stock_update(request):
     if request.method == "POST":
+        logger.error(request.POST.get("username", "not_user"))
         for key, value in request.POST.items():
             if key.startswith("stocks_"):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    product.total_stock = int(value)
-                    markets_stock_update(product.__dict__)
+                    stock_diff = int(value) - product.available_stock
+                    if stock_diff != 0:
+                        product.total_stock += stock_diff
+                        product.save()
                 except Product.DoesNotExist:
-                    print(f"Product with id {product_id} does not exist")
+                    logger.error(f"Product with id {product_id} does not exist")
             elif key.startswith("avito_"):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    product.avito_reserved = int(value)
-                    product.save()
+                    if product.avito_reserved != int(value):
+                        product.add_to_history("Avito", int(value))
+                        logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {int(value)}")
+                        product.avito_reserved = int(value)
+                        product.save()
                 except Product.DoesNotExist:
-                    print(f"Product with id {product_id} does not exist")
+                    logger.error(f"Product with id {product_id} does not exist")
         city = request.POST.get("city", "all")
         return redirect(f"{reverse('home')}?city={city}")
     return HttpResponse("Invalid request method", status=405)
+
+def get_logs(request):
+    if not os.path.exists(LOG_FILE_PATH):
+        return JsonResponse({"error": "Log file not found"}, status=404)
+
+    try:
+        with open(LOG_FILE_PATH, "r", encoding="utf-8") as log_file:
+            logs = log_file.readlines()
+        return HttpResponse("".join(logs[-1000:][::-1]), content_type="text/plain")
+    except Exception as e:
+        return JsonResponse({"error": "Failed to read logs - {e}"}, status=500)
+
+
+@login_required
+def sync_kill_switch(request):
+    if request.method == "POST":
+        control = Control(app)  # Здесь предполагается, что Control - это объект для управления Celery
+        task_name = "api.tasks.pushing_stocks"
+
+        try:
+            turn_on = request.POST.get("turnOn")  # Получаем 'turnOn' с фронтенда
+            if turn_on is None:
+                return JsonResponse({"error": "Missing 'turnOn' parameter"}, status=400)
+
+            turn_on = turn_on.lower() == "true"  # Преобразуем строку в булево значение
+
+            if turn_on:
+                app.control.enable_events()
+                is_enabled = True
+                logger.warning("Push stocks enabled")
+            else:
+                inspect = app.control.inspect()
+                active_tasks = inspect.active() or {}
+                # Поиск активной задачи по имени
+                task_ids = [
+                    task.get("id")
+                    for tasks in active_tasks.values()
+                    for task in tasks
+                    if task.get("name") == task_name
+                ]
+                for task_id in task_ids:
+                    app.control.revoke(task_id, terminate=True)  # Завершаем задачу по ID
+                is_enabled = False
+                logger.warning("Push stocks disabled")
+
+            return JsonResponse({"is_enabled": is_enabled})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)

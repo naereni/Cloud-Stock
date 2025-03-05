@@ -14,38 +14,6 @@ function applyChanges(inputElement, valueElement) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const csrfToken = getCsrfToken();
-
-    // Кнопка для пулла остатков с озона с подтверждением
-    const pullOzonButton = document.getElementById('pull-ozon-button');
-    if (pullOzonButton) {
-        pullOzonButton.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default form submission
-            if (confirm('Вы уверены, что хотите вытянуть остатки с Озона?')) {
-                fetch("/pull_ozon_stocks/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": csrfToken,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({})
-                })
-                .then(response => {
-                    if (response.ok) {
-                        console.log("Запрос отправлен");
-                        // Optionally, redirect or update the UI
-                        window.location.href = "{% url 'success_pull' %}";
-                    } else {
-                        console.error('Ошибка при отправке запроса:', response.statusText);
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при отправке запроса:', error);
-                });
-            }
-        });
-    }
-
     // Поиск по названию (Real-time search)
     const searchInput = document.getElementById('search-input');
     if (searchInput) {

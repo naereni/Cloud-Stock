@@ -25,9 +25,9 @@ class WB(Market):
         )
         self.status_map = {
             "new": ("WbNew", (1, 1)),
+            "deliver": ("WbDeliver", (0, 1)),
             "receive": ("WbComplited", (0, -1)),
             "cancel": ("WbCancelled", (-1, -1)),
-            "10": ("WbReject", (-1, -1)),
         }
 
     async def poll(self):
@@ -35,6 +35,24 @@ class WB(Market):
             self.process_orders(),
         )
         self.cache.clean()
+
+    async def process_orders(self):
+        endpoint = "v3/dbs/orders/new"
+
+        orders_data = await self._aget(endpoint)
+        orders_data = await self.pull_orders_status(orders_data)
+
+        for order in orders_data["orders"]:
+            status, operation = self.status_map.get(order["supplierStatus"], (False, (0, 0)))
+            if status == "WbDeliver":
+                @sync_to_async
+                def update_product():
+                    with atomic():
+                        Product.objects.filter(y_warehouse=y_whs[i], y_sku=item["offerId"]).update(
+                            y_reserved=F("y_reserved") + res
+                        )
+
+                await update_product()
 
     async def pull_orders_status(self, orders_data: dict):
         endpoint = "v3/dbs/orders/status"
@@ -63,12 +81,8 @@ class WB(Market):
         orders_data = await self.pull_orders_status(orders_data)
 
         for order in orders_data["orders"]:
-            if order["supplierStatus"] == "receive" and not self.cache.check(
-                str(order["supplierStatus"]) + "new"
-            ):
-                logger.info(f"Ozon unprocessed delivered order, skip - {order["supplierStatus"]}")
-                continue
             status, operation = self.status_map.get(order["supplierStatus"], (False, (0, 0)))
+            status == ""
             if status and not self.cache.check(str(order["id"]) + status) and not first_time:
                 logger.info(f"{status} {order}")
                 for sku in order["skus"]:
