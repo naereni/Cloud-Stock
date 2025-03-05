@@ -98,7 +98,7 @@ class Product(models.Model):
         if self.is_complement and not is_secondary_call:
             for subname in self.name.split(" / "):
                 try:
-                    child = Product.objects.get(name=subname, city=self.city)
+                    child = Product.objects.get(name=subname, city=self.city).exclude(id=is_secondary_call)
                     if stock_diff != 0:
                         child.total_stock += stock_diff
                         child.last_user = self.last_user + "-FromComliment(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
@@ -121,7 +121,7 @@ class Product(models.Model):
                     second_part_stock = self.available_stock
                 complement.total_stock = min(self.available_stock, second_part_stock)
                 complement.last_user = self.last_user + "-FromChild(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
-                complement.save(is_secondary_call=True)
+                complement.save(is_secondary_call=complement.id)
         
 
         super().save(*args, **kwargs)
