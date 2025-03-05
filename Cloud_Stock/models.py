@@ -82,6 +82,7 @@ class Product(models.Model):
         }
 
     def save(self, is_secondary_call=False, *args, **kwargs):
+        logger.info(f"$$$ SAVE {self.__dict__}")
         stock_diff = self.total_stock - self.prev_total_stock
 
         self.available_stock = (

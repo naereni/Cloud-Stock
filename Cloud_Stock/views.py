@@ -145,7 +145,6 @@ def login_view(request):
 @login_required
 def user_stock_update(request):
     if request.method == "POST":
-        logger.error(request.POST.get("username", "not_user"))
         for key, value in request.POST.items():
             if key.startswith("stocks_"):
                 product_id = key.split("_")[-1]
