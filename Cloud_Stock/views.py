@@ -150,8 +150,7 @@ def user_stock_update(request):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    new_value = int(value)
-                    stock_diff = new_value - product.available_stock
+                    stock_diff = int(value) - product.available_stock
                     if stock_diff != 0:
                         product.total_stock += stock_diff
                         product.save()
@@ -161,14 +160,17 @@ def user_stock_update(request):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    old_avito = product.avito_reserved
-                    product.avito_reserved = new_avito = int(value)
-                    if new_avito != old_avito:
-                        product.add_to_history("Avito", new_avito)
-                        logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {new_avito}")
-                        if new_avito > old_avito:
-                            diff = new_avito - old_avito
-                            product.total_stock -= diff
+                    new_value = int(value)
+                    old_value = product.avito_reserved
+                    if new_value != old_value:
+                        product.add_to_history("Avito", new_value)
+                        logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {new_value}")
+                        delta = new_value - old_value
+                        # Если изменение положительное (+), вычитаем дельту из total_stock
+                        if delta > 0:
+                            product.total_stock -= delta
+                        # При отрицательном изменении (-) не трогаем total_stock
+                        product.avito_reserved = new_value
                         product.save()
                 except Product.DoesNotExist:
                     logger.error(f"Product with id {product_id} does not exist")
