@@ -161,8 +161,8 @@ def user_stock_update(request):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    product.avito_reserved = new_avito = int(value)
                     old_avito = product.avito_reserved
+                    product.avito_reserved = new_avito = int(value)
                     if new_avito != old_avito:
                         product.add_to_history("Avito", new_avito)
                         logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {new_avito}")
