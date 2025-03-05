@@ -146,11 +146,13 @@ def login_view(request):
 def user_stock_update(request):
     if request.method == "POST":
         for key, value in request.POST.items():
+            # Обработка основного запаса (stocks_)
             if key.startswith("stocks_"):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    stock_diff = int(value) - product.available_stock
+                    new_value = int(value)
+                    stock_diff = new_value - product.available_stock
                     if stock_diff != 0:
                         product.total_stock += stock_diff
                         product.save()
@@ -160,12 +162,15 @@ def user_stock_update(request):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
-                    if product.avito_reserved != int(value):
-                        product.add_to_history("Avito", int(value))
-                        logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {int(value)}")
-                        if product.avito_reserved < int(value):
-                            product.total_stock -= int(value) - product.avito_reserved - 1
-                        product.avito_reserved = int(value)
+                    new_avito = int(value)
+                    old_avito = product.avito_reserved
+                    if new_avito != old_avito:
+                        product.add_to_history("Avito", new_avito)
+                        logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {new_avito}")
+                        if new_avito > old_avito:
+                            diff = new_avito - old_avito
+                            product.total_stock -= diff
+                        product.avito_reserved = new_avito
                         product.save()
                 except Product.DoesNotExist:
                     logger.error(f"Product with id {product_id} does not exist")
