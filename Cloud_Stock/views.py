@@ -115,6 +115,7 @@ def create(request):
             form.save()
             return redirect("home")
         else:
+            logger.error(form.errors)  
             error = "Проблемы с вводом данных"
 
     form = ProductForm()

@@ -54,21 +54,26 @@ class Product(models.Model):
         return {
             'id': self.id,
             'name': self.name,
+
             'y_sku': self.y_sku,
             'ozon_sku': self.ozon_sku,
             'ozon_product_id': self.ozon_product_id,
             'wb_sku': self.wb_sku,
+
             'city': self.city,
             'y_warehouse': self.y_warehouse,
             'ozon_warehouse': self.ozon_warehouse,
             'wb_warehouse': self.wb_warehouse,
+
             'total_stock': self.total_stock,
             'prev_total_stock': self.prev_total_stock,
             'available_stock': self.available_stock,
+            
             'ozon_reserved': self.ozon_reserved,
             'y_reserved': self.y_reserved,
             'wb_reserved': self.wb_reserved,
             'avito_reserved': self.avito_reserved,
+
             'last_user': self.last_user,
             'is_sync': self.is_sync,
             'is_modified': self.is_modified,

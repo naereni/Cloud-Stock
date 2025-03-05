@@ -40,7 +40,10 @@ class ProductForm(forms.ModelForm):
         self.fields["y_sku"].required = False
         self.fields["ozon_sku"].required = False
         self.fields["wb_sku"].required = False
-
+        self.fields["ozon_reserved"].required = False
+        self.fields["y_reserved"].required = False
+        self.fields["wb_reserved"].required = False 
+        self.fields["available_stock"].required = False
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=150, required=True)
