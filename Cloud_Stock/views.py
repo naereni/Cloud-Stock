@@ -166,10 +166,8 @@ def user_stock_update(request):
                         product.add_to_history("Avito", new_value)
                         logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {new_value}")
                         delta = new_value - old_value
-                        # Если изменение положительное (+), вычитаем дельту из total_stock
                         if delta > 0:
-                            product.total_stock -= delta
-                        # При отрицательном изменении (-) не трогаем total_stock
+                            product.total_stock += delta
                         product.avito_reserved = new_value
                         product.save()
                 except Product.DoesNotExist:
