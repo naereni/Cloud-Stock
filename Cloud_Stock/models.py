@@ -81,7 +81,7 @@ class Product(models.Model):
             'is_complement': self.is_complement
         }
 
-    def save(self, is_secondary_call=False, *args, **kwargs):
+    def save(self, exclude_id=False, *args, **kwargs):
         logger.info(f"$$$ SAVE {self.__dict__}")
         stock_diff = self.total_stock - self.prev_total_stock
 
@@ -95,19 +95,21 @@ class Product(models.Model):
             self.add_to_history(self.last_user, self.available_stock)
             self.is_modified = True
 
-        if self.is_complement and not is_secondary_call:
+        if self.is_complement and not exclude_id:
+            exclude_child_id = exclude_id if exclude_id else self.id
             for subname in self.name.split(" / "):
                 try:
-                    child = Product.objects.get(name=subname, city=self.city).exclude(id=is_secondary_call)
+                    child = Product.objects.get(name=subname, city=self.city)
+                    if child.id == exclude_child_id: continue
                     if stock_diff != 0:
                         child.total_stock += stock_diff
                         child.last_user = self.last_user + "-FromComliment(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
-                        child.save(is_secondary_call=self.id)
+                        child.save(exclude_id=self.id)
                 except ObjectDoesNotExist:
                     pass
 
         if self.is_part_of_compliment:
-            exclude_comp_id = is_secondary_call if is_secondary_call else self.id
+            exclude_comp_id = exclude_id if exclude_id else self.id
             complements = Product.objects.filter(
                 is_complement=True, name__contains=self.name, city=self.city
             ).exclude(id=exclude_comp_id)
@@ -121,7 +123,7 @@ class Product(models.Model):
                     second_part_stock = self.available_stock
                 complement.total_stock = min(self.available_stock, second_part_stock)
                 complement.last_user = self.last_user + "-FromChild(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
-                complement.save(is_secondary_call=complement.id)
+                complement.save(exclude_id=complement.id)
         
 
         super().save(*args, **kwargs)
