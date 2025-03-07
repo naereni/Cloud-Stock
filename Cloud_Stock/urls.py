@@ -13,6 +13,6 @@ urlpatterns = [
     path("user_stock_update/", user_stock_update, name="user_stock_update"),
     path("update/<int:pk>/", InfoUpdateView.as_view(), name="update"),
     path("delete/<int:pk>/", InfoDeleteView.as_view(), name="delete"),
-    path("logs/", get_logs, name="logs"),
+    path("logs/", logs, name="logs"),
     path("sync-kill-switch/", sync_kill_switch, name="sync_kill_switch"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

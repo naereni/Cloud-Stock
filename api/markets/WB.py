@@ -88,7 +88,7 @@ class WB(Market):
                 for sku in order["skus"]:
                     qty, res = operation()
                     await asave_product(
-                        service=status,
+                        service=status+f"({order['id']})",
                         filters={"wb_warehouse": order["warehouseId"], "wb_sku": sku},
                         quantity=qty,
                         wb_reserved=res,

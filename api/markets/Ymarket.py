@@ -95,7 +95,7 @@ class Ymarket(Market):
                     for item in order["items"]:
                         qty, res = operation(item["count"])
                         await asave_product(
-                            service=status,
+                            service=status+f"({order["id"]})",
                             filters={"y_warehouse": y_whs[i], "y_sku": item["offerId"]},
                             quantity=qty,
                             y_reserved=res,

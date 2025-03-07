@@ -50,37 +50,6 @@ class Product(models.Model):
         }
         self.history.append(history_entry)
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-
-            'y_sku': self.y_sku,
-            'ozon_sku': self.ozon_sku,
-            'ozon_product_id': self.ozon_product_id,
-            'wb_sku': self.wb_sku,
-
-            'city': self.city,
-            'y_warehouse': self.y_warehouse,
-            'ozon_warehouse': self.ozon_warehouse,
-            'wb_warehouse': self.wb_warehouse,
-
-            'total_stock': self.total_stock,
-            'prev_total_stock': self.prev_total_stock,
-            'available_stock': self.available_stock,
-            
-            'ozon_reserved': self.ozon_reserved,
-            'y_reserved': self.y_reserved,
-            'wb_reserved': self.wb_reserved,
-            'avito_reserved': self.avito_reserved,
-
-            'last_user': self.last_user,
-            'is_sync': self.is_sync,
-            'is_modified': self.is_modified,
-            'is_part_of_compliment': self.is_part_of_compliment,
-            'is_complement': self.is_complement
-        }
-
     def save(self, exclude_id=False, *args, **kwargs):
         logger.info(f"$$$ SAVE {self.__dict__}")
         stock_diff = self.total_stock - self.prev_total_stock
@@ -91,22 +60,12 @@ class Product(models.Model):
 
         if stock_diff != 0:
             self.prev_total_stock = self.total_stock
-            logger.info(f"{self.last_user} - [{self.city}, {self.name.strip()}] - {stock_diff}")
+            logger.info(f"{self.last_user} - [{self.city}, {self.name.strip()}] - delta={stock_diff}")
             self.add_to_history(self.last_user, self.available_stock)
             self.is_modified = True
 
-        if self.is_complement and not exclude_id:
-            exclude_child_id = exclude_id if exclude_id else self.id
-            for subname in self.name.split(" / "):
-                try:
-                    child = Product.objects.get(name=subname, city=self.city)
-                    if child.id == exclude_child_id: continue
-                    if stock_diff != 0:
-                        child.total_stock += stock_diff
-                        child.last_user = self.last_user + "-FromComliment(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
-                        child.save(exclude_id=self.id)
-                except ObjectDoesNotExist:
-                    pass
+        super().save(*args, **kwargs)
+
 
         if self.is_part_of_compliment:
             exclude_comp_id = exclude_id if exclude_id else self.id
@@ -114,16 +73,18 @@ class Product(models.Model):
                 is_complement=True, name__contains=self.name, city=self.city
             ).exclude(id=exclude_comp_id)
             for complement in complements:
-                subname1, subname2 = complement.name.split(" / ")
-                subname = subname1.strip() if self.name == subname2 else subname2.strip()
-                try:
-                    second_part_stock = Product.objects.get(name=subname, city=self.city).available_stock
-                except Exception as e:
-                    logger.error(f"Save comp from child '{subname}' error: {e}")
-                    second_part_stock = self.available_stock
+                subnames = [subname.strip() for subname in complement.name.split(" / ")]
+                subname = subnames[0] if self.name == subnames[1] else subnames[1]
+                second_part_stock = Product.objects.get(name=subname, city=self.city).available_stock
                 complement.total_stock = min(self.available_stock, second_part_stock)
-                complement.last_user = self.last_user + "-FromChild(" + (self.y_sku if self.y_sku is not None else self.name) + ")"
-                complement.save(exclude_id=complement.id)
-        
+                complement.last_user = self.last_user + f"-FromChild({self.y_sku})"
+                complement.save(exclude_id=True) # force save for compliment
 
-        super().save(*args, **kwargs)
+
+        if self.is_complement and stock_diff!=0 and not exclude_id:
+            subnames = [subname.strip() for subname in self.name.split(" / ")]
+            for subname in subnames:
+                child = Product.objects.get(name=subname, city=self.city)
+                child.total_stock += stock_diff
+                child.last_user = self.last_user + f"-FromComliment({self.y_sku})"
+                child.save(exclude_id=self.id)

@@ -1,3 +1,4 @@
+import os
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
@@ -9,6 +10,7 @@ from Cloud_Stock.decorators import login_required
 from Cloud_Stock.forms import LoginForm, ProductForm, SearchForm
 from Cloud_Stock.models import Product
 
+from config.django_config import LOG_FILE
 from api.utils import logger
 
 @login_required
@@ -151,40 +153,55 @@ def user_stock_update(request):
                 try:
                     product = Product.objects.get(id=product_id)
                     stock_diff = int(value) - product.available_stock
+
                     if stock_diff != 0:
+                        product.last_user = "USER"
                         product.total_stock += stock_diff
-                        product.save()
+                        product.save(exclude_id=product.id)
+
                 except Product.DoesNotExist:
                     logger.error(f"Product with id {product_id} does not exist")
+
             elif key.startswith("avito_"):
                 product_id = key.split("_")[-1]
                 try:
                     product = Product.objects.get(id=product_id)
                     new_value = int(value)
                     old_value = product.avito_reserved
+
                     if new_value != old_value:
+                        product.last_user = "USER"
                         product.add_to_history("Avito", new_value)
                         logger.info(f"Avito - [{product.city}, {product.name.strip()}] - {new_value}")
+
                         delta = new_value - old_value
-                        if delta > 0:
+                        if delta < 0:
                             product.total_stock += delta
+
                         product.avito_reserved = new_value
                         product.save()
+
                 except Product.DoesNotExist:
                     logger.error(f"Product with id {product_id} does not exist")
+
         city = request.POST.get("city", "all")
+
         return redirect(f"{reverse('home')}?city={city}")
     return HttpResponse("Invalid request method", status=405)
 
-def get_logs(request):
-    if not os.path.exists(LOG_FILE_PATH):
-        return JsonResponse({"error": "Log file not found"}, status=404)
+def logs(request):
+    try:
+        if not os.path.exists(LOG_FILE):
+            return JsonResponse({"error": "Log file not found"}, status=404)
+    except Exception as e:
+        logger.error("Test error", e)
 
     try:
-        with open(LOG_FILE_PATH, "r", encoding="utf-8") as log_file:
+        with open(LOG_FILE, "r", encoding="UTF-8") as log_file:
             logs = log_file.readlines()
-        return HttpResponse("".join(logs[-1000:][::-1]), content_type="text/plain")
+        return HttpResponse("".join(logs[-1000:][::-1]), content_type="text/plain; charset=UTF-8")
     except Exception as e:
+        logger.error(f"Failed to read logs - {e}")
         return JsonResponse({"error": "Failed to read logs - {e}"}, status=500)
 
 

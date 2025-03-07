@@ -64,7 +64,7 @@ class Ozon(Market):
                 for item in order["products"]:
                     qty, res = operation(item["quantity"])
                     await asave_product(
-                        service=status,
+                        service=status+f"({order["order_id"]})",
                         filters={
                             "ozon_warehouse": order["delivery_method"]["warehouse_id"],
                             "ozon_sku": item["sku"],
